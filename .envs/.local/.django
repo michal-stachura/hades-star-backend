@@ -2,6 +2,7 @@
 # ------------------------------------------------------------------------------
 USE_DOCKER=yes
 IPYTHONDIR=/app/.ipython
+DJANGO_ACCOUNT_ALLOW_REGISTRATION=False
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
