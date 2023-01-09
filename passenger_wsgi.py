@@ -5,6 +5,7 @@ from urllib.parse import unquote
 from django.core.wsgi import get_wsgi_application
 
 sys.path.append(os.getcwd())
+os.environ["DJANGO_READ_DOT_ENV_FILE"] = "True"
 os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.production"
 
 
