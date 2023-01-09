@@ -15,7 +15,10 @@ urlpatterns = [
 
 # API URLS
 urlpatterns += [
-    # DRF auth token
+    path(
+        f"api/{settings.API_VERSION}/corporations/",
+        include("hades_star_backend.corporations.urls", namespace="corporations"),
+    ),
     # Docs
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(

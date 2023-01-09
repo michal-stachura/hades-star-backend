@@ -1,3 +1,22 @@
-from django.shortcuts import render
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import GenericViewSet
 
-# Create your views here.
+from hades_star_backend.corporations.models import Corporation
+from hades_star_backend.corporations.serializers import (
+    CorporationDetailSerializer,
+    CorporationSerializer,
+)
+
+
+class CorporationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+    queryset = Corporation.objects.all()
+    lookup_field = "id"
+    permission_classes = [
+        AllowAny,
+    ]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return CorporationDetailSerializer
+        return CorporationSerializer
