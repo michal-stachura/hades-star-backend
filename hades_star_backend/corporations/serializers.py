@@ -14,3 +14,12 @@ class CorporationSerializer(serializers.ModelSerializer):
 
     def get_members_count(self, _) -> int:
         return randrange(30)
+
+
+class CorporationDetailSerializer(CorporationSerializer):
+    class Meta(CorporationSerializer.Meta):
+        fields = CorporationSerializer.Meta.fields + [
+            "level",
+            "flag_ship",
+            "required_influence",
+        ]
