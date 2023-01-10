@@ -98,3 +98,4 @@ CELERY_TASK_SEND_SENT_EVENT = True
 CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
