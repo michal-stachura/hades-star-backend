@@ -1,4 +1,3 @@
-import uuid
 from typing import Any
 
 from dirtyfields import DirtyFieldsMixin
@@ -17,9 +16,7 @@ class CommonManager(models.Manager):
 
 class CommonModel(DirtyFieldsMixin, models.Model):
 
-    id = models.UUIDField(
-        primary_key=True, unique=True, null=False, default=uuid.uuid4(), editable=False
-    )
+    id = models.UUIDField(primary_key=True, unique=True, null=False, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
