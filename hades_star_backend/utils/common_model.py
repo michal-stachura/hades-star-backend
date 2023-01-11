@@ -18,7 +18,7 @@ class CommonManager(models.Manager):
 class CommonModel(DirtyFieldsMixin, models.Model):
 
     id = models.UUIDField(
-        primary_key=True, unique=True, null=False, default=uuid.uuid4(), editable=False
+        primary_key=True, unique=True, null=False, editable=False, default=uuid.uuid4
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

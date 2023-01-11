@@ -1,14 +1,17 @@
 dev:
-	sudo docker-compose -f local.yml up
+	sudo docker-compose -p hsb -f local.yml up
 
 build:
-	sudo docker-compose -f local.yml build
+	sudo docker-compose -p hsb -f local.yml build
 
 migrations:
-	docker-compose -f local.yml run --rm django python manage.py makemigrations
+	docker-compose -p hsb -f local.yml run --rm django python manage.py makemigrations
 
 migrate:
-	docker-compose -f local.yml run --rm django python manage.py migrate
+	docker-compose -p hsb -f local.yml run --rm django python manage.py migrate
 
 superuser:
-	docker-compose -f local.yml run --rm django python manage.py createsuperuser
+	docker-compose -p hsb -f local.yml run --rm django python manage.py createsuperuser
+
+shell:
+	docker-compose -p hsb -f local.yml run --rm django python manage.py shell

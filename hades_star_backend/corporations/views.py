@@ -10,7 +10,11 @@ from hades_star_backend.corporations.serializers import (
 
 
 class CorporationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    queryset = Corporation.objects.all()
+    queryset = (
+        Corporation.objects.prefetch_related("corporation_members")
+        .all()
+        .order_by("name")
+    )
     lookup_field = "id"
     permission_classes = [
         AllowAny,
