@@ -18,8 +18,6 @@ class CorporationSerializer(serializers.ModelSerializer):
 
 class CorporationDetailSerializer(CorporationSerializer):
     members = serializers.SerializerMethodField()
-    discord = serializers.SerializerMethodField()
-    ws_wins = serializers.SerializerMethodField()
 
     class Meta(CorporationSerializer.Meta):
         fields = CorporationSerializer.Meta.fields + [
@@ -31,12 +29,6 @@ class CorporationDetailSerializer(CorporationSerializer):
             "ws_wins",
         ]
 
-    def get_discord(self, _) -> str:
-        return "wwww.discord.com"
-
-    def get_ws_wins(self, _) -> int:
-        return 123
-
     def get_members(self, _) -> list:
         return [
             {
@@ -47,11 +39,11 @@ class CorporationDetailSerializer(CorporationSerializer):
                 "rs_level": 10,
                 "bs_level": 6,
                 "max_mods": 6,
-                "as_eader": False,
+                "as_leader": False,
                 "preferences": ["A"],
             },
             {"id": "uuid-2", "username": "Other username", "next_ws": "R"},
             {"id": "uuid-3", "username": "Boss", "next_ws": "-"},
-            {"id": "uuid-4", "username": "Not a boss", "next_ws": "X"},
-            {"id": "uuid-5", "username": "AAAA", "next_ws": "-"},
+            {"id": "uuid-4", "username": "Like a Boss", "next_ws": "X"},
+            {"id": "uuid-5", "username": "James Dean", "next_ws": "-"},
         ]
