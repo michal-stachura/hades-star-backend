@@ -3,6 +3,7 @@ from random import randrange
 from rest_framework import serializers
 
 from hades_star_backend.corporations.models import Corporation
+from hades_star_backend.members.serializers import MemberDetailSerializer
 
 
 class CorporationSerializer(serializers.ModelSerializer):
@@ -29,21 +30,6 @@ class CorporationDetailSerializer(CorporationSerializer):
             "ws_wins",
         ]
 
-    def get_members(self, _) -> list:
-        return [
-            {
-                "id": "uuid-1",
-                "username": "Stamina",
-                "next_ws": "R",
-                "timeZone": "UTC+2",
-                "rs_level": 10,
-                "bs_level": 6,
-                "max_mods": 6,
-                "as_leader": False,
-                "preferences": ["A"],
-            },
-            {"id": "uuid-2", "username": "Other username", "next_ws": "R"},
-            {"id": "uuid-3", "username": "Boss", "next_ws": "-"},
-            {"id": "uuid-4", "username": "Like a Boss", "next_ws": "X"},
-            {"id": "uuid-5", "username": "James Dean", "next_ws": "-"},
-        ]
+    def get_members(self, obj) -> list:
+        serializer = MemberDetailSerializer(obj.corporation_members.all(), many=True)
+        return serializer.data
