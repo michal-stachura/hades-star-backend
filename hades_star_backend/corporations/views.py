@@ -1,5 +1,8 @@
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from hades_star_backend.corporations.models import Corporation
@@ -7,6 +10,7 @@ from hades_star_backend.corporations.serializers import (
     CorporationDetailSerializer,
     CorporationSerializer,
 )
+from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 
 
 class CorporationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -17,10 +21,24 @@ class CorporationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     )
     lookup_field = "id"
     permission_classes = [
-        AllowAny,
+        CorporationObjectSecretCheck,
     ]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
             return CorporationDetailSerializer
         return CorporationSerializer
+
+    @action(
+        detail=True, methods=["get"], url_path="check-secret", url_name="check-secret"
+    )
+    def check_secret(self, request, *args, **kwargs):
+        self.permission_classes = [AllowAny]
+        secret = request.GET.get("secret", None)
+
+        if self.get_object().allow_edit(secret):
+            return Response(status=status.HTTP_200_OK)
+        return Response(
+            {"status_text": "This secret is not correct"},
+            status=status.HTTP_403_FORBIDDEN,
+        )

@@ -7,6 +7,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from hades_star_backend.members.models import Member
 from hades_star_backend.members.serializers import MemberDetailSerializer
+from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 from hades_star_backend.utils.ship_attributes import ShipAttribute
 
 
@@ -30,6 +31,8 @@ class MemberViewSet(GenericViewSet, RetrieveModelMixin):
 
     @action(detail=True, methods=["patch"], url_path="next-ws", url_name="next-ws")
     def next_ws(self, request, *args, **kwargs):
+        self.permission_classes = [CorporationObjectSecretCheck]
+
         member = self.get_object()
         serializer = self.get_serializer(member, data=request.data, partial=True)
         if serializer.is_valid():
@@ -39,6 +42,8 @@ class MemberViewSet(GenericViewSet, RetrieveModelMixin):
 
     @action(detail=True, methods=["patch"], url_path="attribute", url_name="attribute")
     def attribute(self, request, *args, **kwargs):
+        self.permission_classes = [CorporationObjectSecretCheck]
+
         attribute_name = request.data.get("attribute_name", None)
         attribute_id = request.data.get("attribute_id", None)
         attrribute_value = request.data.get("value", None)

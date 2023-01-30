@@ -5,6 +5,7 @@ Base settings to build other settings files upon.
 import os
 
 import environ
+from corsheaders.defaults import default_headers
 
 # ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 ROOT_DIR = os.path.dirname(os.path.realpath("__file__"))
@@ -277,6 +278,10 @@ REST_FRAMEWORK = {
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "Corporation-Secret",
+]
 
 # By Default swagger ui is available only to admin user(s). You can change permission classes to change that
 # See more configuration options at https://drf-spectacular.readthedocs.io/en/latest/settings.html#settings
