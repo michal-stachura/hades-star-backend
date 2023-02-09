@@ -1,7 +1,6 @@
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import RetrieveModelMixin
-from rest_framework.permissions import AllowAny
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -11,7 +10,9 @@ from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 from hades_star_backend.utils.ship_attributes import ShipAttribute
 
 
-class MemberViewSet(GenericViewSet, RetrieveModelMixin):
+class MemberViewSet(
+    GenericViewSet, RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
+):
     queryset = (
         Member.objects.all()
         .prefetch_related(
@@ -26,12 +27,20 @@ class MemberViewSet(GenericViewSet, RetrieveModelMixin):
     serializer_class = MemberDetailSerializer
     lookup_field = "id"
     permission_classes = [
-        AllowAny,
+        CorporationObjectSecretCheck,
     ]
+
+    def create(self, request, *args, **kwargs):
+        corporation_id = request.data.get("corporation", None)
+        if not corporation_id:
+            return Response(
+                {"detail": "Please provide member's corporation"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().create(request, *args, **kwargs)
 
     @action(detail=True, methods=["patch"], url_path="next-ws", url_name="next-ws")
     def next_ws(self, request, *args, **kwargs):
-        self.permission_classes = [CorporationObjectSecretCheck]
 
         member = self.get_object()
         serializer = self.get_serializer(member, data=request.data, partial=True)
@@ -42,7 +51,6 @@ class MemberViewSet(GenericViewSet, RetrieveModelMixin):
 
     @action(detail=True, methods=["patch"], url_path="attribute", url_name="attribute")
     def attribute(self, request, *args, **kwargs):
-        self.permission_classes = [CorporationObjectSecretCheck]
 
         attribute_name = request.data.get("attribute_name", None)
         attribute_id = request.data.get("attribute_id", None)
@@ -51,7 +59,20 @@ class MemberViewSet(GenericViewSet, RetrieveModelMixin):
             attribute = self.__update_attribute(
                 attribute_name, attribute_id, attrribute_value
             )
-            return Response({"current_value": attribute.value})
+            return Response({"value": attribute.value})
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path="remove-corporation",
+        url_name="remove-corporation",
+    )
+    def remove_coorporation(self, request, *args, **kwargs):
+        corporation_id = request.data.get("corporation_id", None)
+
+        if corporation_id and self.get_object().remove_corporation(corporation_id):
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def __update_attribute(self, attribute_name, attribute_id, attribute_value):

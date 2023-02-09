@@ -42,3 +42,21 @@ class CorporationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
             {"status_text": "This secret is not correct"},
             status=status.HTTP_403_FORBIDDEN,
         )
+
+    @action(
+        detail=True, methods=["patch"], url_path="set-secret", url_name="set-secret"
+    )
+    def set_secret(self, request, *args, **kwargs):
+        new_secret = request.data.get("new_secret", None)
+        if new_secret is not None and new_secret != "":
+            self.get_object().set_secret(new_secret)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"status_text": "Please provide a new secret"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     import time
+    #     time.sleep(3)
+    #     return super().retrieve(request, *args, **kwargs)

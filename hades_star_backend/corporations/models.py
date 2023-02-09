@@ -18,3 +18,7 @@ class Corporation(CommonModel):
 
     def allow_edit(self, secret_string: str) -> bool:
         return secret_string == self.secret
+
+    def set_secret(self, new_secret: str) -> None:
+        self.secret = new_secret
+        self.save()

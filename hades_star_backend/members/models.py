@@ -127,6 +127,13 @@ class Member(CommonModel):
             )
         Trade.objects.bulk_create(new_items)
 
+    def remove_corporation(self, corporation_id: str) -> bool:
+        corporation = self.corporation.all().filter(id=corporation_id).first()
+        if corporation:
+            self.corporation.remove(corporation)
+            return True
+        return False
+
     def save(self, *args, **kwargs):
 
         super().save(*args, **kwargs)
