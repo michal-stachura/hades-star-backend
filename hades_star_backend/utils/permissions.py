@@ -21,7 +21,5 @@ class CorporationObjectSecretCheck(permissions.BasePermission):
                     pass
 
         if corporation:
-            print(header_secret)
-            print(corporation.allow_edit(header_secret))
             return corporation.allow_edit(header_secret)
         return False
