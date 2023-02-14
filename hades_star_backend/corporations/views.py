@@ -1,6 +1,11 @@
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -14,7 +19,11 @@ from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 
 
 class CorporationViewSet(
-    GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+    GenericViewSet,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    CreateModelMixin,
 ):
     queryset = (
         Corporation.objects.prefetch_related("corporation_members")
@@ -27,10 +36,23 @@ class CorporationViewSet(
     ]
 
     def get_serializer_class(self):
-        print(self.action)
         if self.action in ["retrieve", "partial_update"]:
             return CorporationDetailSerializer
         return CorporationSerializer
+
+    def create(self, request, *args, **kwargs):
+        new_corporation = Corporation.objects.create(
+            name=request.data.get("name"),
+            secret=request.data.get("secret"),
+        )
+
+        if new_corporation:
+            serializer = self.get_serializer(new_corporation)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"detail": "Error adding corporation"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @action(
         detail=True, methods=["get"], url_path="check-secret", url_name="check-secret"

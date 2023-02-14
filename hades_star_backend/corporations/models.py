@@ -11,7 +11,7 @@ class Corporation(CommonModel):
     required_influence = models.PositiveIntegerField(null=True, blank=True)
     discord = models.URLField(null=True, blank=True)
     ws_wins = models.PositiveSmallIntegerField(default=0)
-    secret = models.CharField(max_length=20, default="secret")
+    secret = models.CharField(max_length=20, null=False)
 
     def __str__(self) -> str:
         return f"{self.name}"
