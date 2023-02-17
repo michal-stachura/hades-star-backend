@@ -135,3 +135,4 @@ SPECTACULAR_SETTINGS["SERVERS"] = [  # noqa F405
 ]
 # Your stuff...
 # ------------------------------------------------------------------------------
+CORS_ALLOWED_ORIGINS = ["https://profound-madeleine-1c69eb.netlify.app"]
