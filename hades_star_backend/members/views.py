@@ -55,7 +55,8 @@ class MemberViewSet(
         attribute_name = request.data.get("attribute_name", None)
         attribute_id = request.data.get("attribute_id", None)
         attrribute_value = request.data.get("value", None)
-        if attribute_name and attribute_id and attrribute_value:
+
+        if attribute_name and attribute_id and isinstance(attrribute_value, int):
             attribute = self.__update_attribute(
                 attribute_name, attribute_id, attrribute_value
             )
