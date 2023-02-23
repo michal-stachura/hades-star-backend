@@ -80,8 +80,3 @@ class CorporationViewSet(
             {"status_text": "Please provide a new secret"},
             status=status.HTTP_403_FORBIDDEN,
         )
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     import time
-    #     time.sleep(3)
-    #     return super().retrieve(request, *args, **kwargs)
