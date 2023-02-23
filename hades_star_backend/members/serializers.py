@@ -28,6 +28,8 @@ class ModuleAttributeSerializer(serializers.ModelSerializer):
 
 class MemberDetailSerializer(MemberSerializer):
     attributes = serializers.SerializerMethodField()
+    is_visible = serializers.SerializerMethodField()
+    next_ws = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,10 +43,17 @@ class MemberDetailSerializer(MemberSerializer):
             "bs_level",
             "as_leader",
             "attributes",
+            "is_visible",
         ]
 
         excluded_fields = self.context.get("excluded_fields", [])
         self.Meta.fields = list(set(base_fields) - set(excluded_fields))
+
+    def get_next_ws(self, obj):
+        return obj.next_ws or "-"
+
+    def get_is_visible(self, obj):
+        return True
 
     def get_attributes(self, obj):
         attributes = {}
