@@ -22,3 +22,25 @@ class Corporation(CommonModel):
     def set_secret(self, new_secret: str) -> None:
         self.secret = new_secret
         self.save()
+
+
+class Filter(CommonModel):
+
+    name = models.CharField(max_length=50, null=False)
+    corporation = models.ForeignKey(
+        Corporation, on_delete=models.CASCADE, related_name="corporation_filter"
+    )
+    created_by = models.ForeignKey(
+        "members.Member",
+        on_delete=models.SET_NULL,
+        related_name="member_filter",
+        blank=True,
+        null=True,
+    )
+    conditions = models.JSONField(null=False, blank=False)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return f"{self.name}"

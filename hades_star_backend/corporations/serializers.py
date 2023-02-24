@@ -1,7 +1,13 @@
 from rest_framework import serializers
 
-from hades_star_backend.corporations.models import Corporation
+from hades_star_backend.corporations.models import Corporation, Filter
 from hades_star_backend.members.serializers import MemberDetailSerializer
+
+
+class FilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filter
+        fields = ["id", "name", "corporation", "created_by", "conditions"]
 
 
 class CorporationSerializer(serializers.ModelSerializer):
@@ -17,6 +23,7 @@ class CorporationSerializer(serializers.ModelSerializer):
 
 class CorporationDetailSerializer(CorporationSerializer):
     members = serializers.SerializerMethodField()
+    filters = serializers.SerializerMethodField()
 
     class Meta(CorporationSerializer.Meta):
         fields = CorporationSerializer.Meta.fields + [
@@ -26,6 +33,7 @@ class CorporationDetailSerializer(CorporationSerializer):
             "members",
             "discord",
             "ws_wins",
+            "filters",
         ]
 
     def get_members(self, obj) -> list:
@@ -41,5 +49,12 @@ class CorporationDetailSerializer(CorporationSerializer):
             .order_by("name"),
             many=True,
             context={"excluded_fields": ["corporation"]},
+        )
+        return serializer.data
+
+    def get_filters(self, obj) -> list:
+        serializer = FilterSerializer(
+            obj.corporation_filter.all(),
+            many=True,
         )
         return serializer.data

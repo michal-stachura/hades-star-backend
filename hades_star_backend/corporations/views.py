@@ -26,7 +26,9 @@ class CorporationViewSet(
     CreateModelMixin,
 ):
     queryset = (
-        Corporation.objects.prefetch_related("corporation_members")
+        Corporation.objects.prefetch_related(
+            "corporation_members", "corporation_filter"
+        )
         .all()
         .order_by("name")
     )

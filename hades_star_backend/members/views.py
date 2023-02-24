@@ -45,7 +45,9 @@ class MemberViewSet(
         member = self.get_object()
         serializer = self.get_serializer(member, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            member.next_ws = request.data.get("next_ws", None)
+            member.save()
+            serializer = self.get_serializer(member)
             return Response(serializer.data)
         return Response(serializer.errors)
 
