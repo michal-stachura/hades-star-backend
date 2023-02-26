@@ -75,6 +75,13 @@ class ShipAttribute:
         if group_name:
             self.group_name = group_name
 
+    def __convert_attribute_to_dict(self, attribute):
+        return {
+            "id": attribute[0],
+            "name": attribute[1],
+            "max": self.get_maximum_value(attribute[0]),
+        }
+
     def find_group_name_by_attribute_name(self, attribute_name: str) -> str | None:
         for key in self.attributes.keys():
             test = list(filter(lambda x: x[0] == attribute_name, self.attributes[key]))
@@ -108,3 +115,14 @@ class ShipAttribute:
             return 10
         else:
             return 12
+
+    def get_attributes_json_dict(self) -> dict:
+        attributes_dict = {}
+
+        for key in self.attributes.keys():
+            self.group_name = key
+            attributes_dict[key] = map(
+                self.__convert_attribute_to_dict, self.get_attributes()
+            )
+
+        return attributes_dict
