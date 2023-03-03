@@ -10,10 +10,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from hades_star_backend.corporations.models import Corporation
+from hades_star_backend.corporations.models import Corporation, Filter
 from hades_star_backend.corporations.serializers import (
     CorporationDetailSerializer,
     CorporationSerializer,
+    FilterSerializer,
 )
 from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 
@@ -81,4 +82,17 @@ class CorporationViewSet(
         return Response(
             {"status_text": "Please provide a new secret"},
             status=status.HTTP_403_FORBIDDEN,
+        )
+
+    @action(detail=True, methods=["post"], url_path="add-filter", url_name="add-filter")
+    def add_filter(self, request, *args, **kwargs):
+        filter = Filter.objects.create(
+            name=request.data.get("name", ""),
+            corporation=self.get_object(),
+            conditions=request.data.get("conditions", {}),
+        )
+        serializer = FilterSerializer(filter)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
         )

@@ -80,6 +80,7 @@ class ShipAttribute:
             "id": attribute[0],
             "name": attribute[1],
             "max": self.get_maximum_value(attribute[0]),
+            "set": 0,
         }
 
     def find_group_name_by_attribute_name(self, attribute_name: str) -> str | None:
