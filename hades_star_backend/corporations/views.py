@@ -96,3 +96,22 @@ class CorporationViewSet(
             serializer.data,
             status=status.HTTP_201_CREATED,
         )
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path="delete-filter",
+        url_name="delete-filter",
+    )
+    def delete_filter(self, request, *args, **kwargs):
+        corporation = self.get_object()
+        filter_id_to_delete = request.data.get("filter_id", None)
+
+        try:
+            corp_filter = corporation.corporation_filter.get(id=filter_id_to_delete)
+            # corp_filter.delete()
+            resp_status = status.HTTP_204_NO_CONTENT
+        except corp_filter.DoesNotExist:
+            resp_status = status.HTTP_404_NOT_FOUND
+
+        return Response(status=resp_status)
