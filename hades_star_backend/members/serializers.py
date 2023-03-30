@@ -23,7 +23,7 @@ class ModuleAttributeSerializer(serializers.ModelSerializer):
         self.Meta.model = self.context.get("model", Weapon)
 
     class Meta:
-        fields = ["id", "name", "value", "max"]
+        fields = ["id", "name", "set", "max"]
 
 
 class MemberDetailSerializer(MemberSerializer):

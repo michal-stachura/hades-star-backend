@@ -146,7 +146,7 @@ class AtributeCommonModel(models.Model):
     member = models.ForeignKey(
         Member, on_delete=models.CASCADE, related_name="members_%(class)s"
     )
-    value = models.PositiveSmallIntegerField(default=0)
+    set = models.PositiveSmallIntegerField(default=0)
     max = models.PositiveSmallIntegerField(default=12, editable=True)
     position = models.PositiveSmallIntegerField(default=0, editable=False)
 
@@ -154,9 +154,9 @@ class AtributeCommonModel(models.Model):
         ordering = ["position"]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(value__lte=12),
-                name="%(app_label)s_%(class)s_max_value__lte_12",
-                violation_error_message="Maximum value must be lower than 12",
+                check=models.Q(set__lte=12),
+                name="%(app_label)s_%(class)s_max_set__lte_12",
+                violation_error_message="Maximum value you can set must be lower than 12",
             ),
             models.UniqueConstraint(
                 fields=["member", "name"],
@@ -202,7 +202,7 @@ class Support(AtributeCommonModel):
         constraints = AtributeCommonModel.Meta.constraints + [
             models.CheckConstraint(
                 check=(
-                    models.Q(name="SANCTUARY", value__lte=1)
+                    models.Q(name="SANCTUARY", set__lte=1)
                     | models.Q(
                         name__in=[
                             "EMP",
@@ -229,11 +229,11 @@ class Support(AtributeCommonModel):
                             "OMEGA_ROCKET",
                             "REMOTE_BOMB",
                         ],
-                        value__lte=12,
+                        set__lte=12,
                     )
                 ),
-                name="%(app_label)s_%(class)s_max_value__gt_1_or_lt_12",
-                violation_error_message="For Sanctuary maximum value must be lower than 1, rest attributes must be lower than 12",  # noqa E501
+                name="%(app_label)s_%(class)s_max_set__gt_1_or_lt_12",
+                violation_error_message="For Sanctuary maximum value you can set must be lower than 1, rest attributes must be lower than 12",  # noqa E501
             )
         ]
 

@@ -56,13 +56,13 @@ class MemberViewSet(
 
         attribute_name = request.data.get("attribute_name", None)
         attribute_id = request.data.get("attribute_id", None)
-        attrribute_value = request.data.get("value", None)
+        attrribute_set = request.data.get("set", None)
 
-        if attribute_name and attribute_id and isinstance(attrribute_value, int):
+        if attribute_name and attribute_id and isinstance(attrribute_set, int):
             attribute = self.__update_attribute(
-                attribute_name, attribute_id, attrribute_value
+                attribute_name, attribute_id, attrribute_set
             )
-            return Response({"value": attribute.value})
+            return Response({"set": attribute.set})
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     @action(
@@ -78,7 +78,7 @@ class MemberViewSet(
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def __update_attribute(self, attribute_name, attribute_id, attribute_value):
+    def __update_attribute(self, attribute_name, attribute_id, attribute_set):
         group_name = ShipAttribute().find_group_name_by_attribute_name(attribute_name)
         if group_name == "weapon":
             attribute = self.get_object().members_weapon.all().get(id=attribute_id)
@@ -94,6 +94,6 @@ class MemberViewSet(
             attribute = None
 
         if attribute:
-            attribute.value = attribute_value
+            attribute.set = attribute_set
             attribute.save()
         return attribute

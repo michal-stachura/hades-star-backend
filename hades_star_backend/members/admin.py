@@ -33,7 +33,7 @@ class MemberAdmin(admin.ModelAdmin):
 
 @admin.register(Weapon)
 class WeaponAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "member", "name", "value"]
+    list_display = ["__str__", "member", "name", "set"]
     readonly_fields = ["position"]
 
     list_filter = ["name"]
@@ -43,7 +43,7 @@ class WeaponAdmin(admin.ModelAdmin):
 
 @admin.register(Shield)
 class ShieldAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "member", "name", "value"]
+    list_display = ["__str__", "member", "name", "set"]
     readonly_fields = ["position"]
 
     list_filter = ["name"]
@@ -53,7 +53,7 @@ class ShieldAdmin(admin.ModelAdmin):
 
 @admin.register(Support)
 class SupportAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "member", "name", "value"]
+    list_display = ["__str__", "member", "name", "set"]
     readonly_fields = ["position"]
 
     list_filter = ["name"]
@@ -63,7 +63,7 @@ class SupportAdmin(admin.ModelAdmin):
 
 @admin.register(Mining)
 class MiningAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "member", "name", "value"]
+    list_display = ["__str__", "member", "name", "set"]
     readonly_fields = ["position"]
     list_filter = ["name"]
 
@@ -72,7 +72,7 @@ class MiningAdmin(admin.ModelAdmin):
 
 @admin.register(Trade)
 class TradeAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "member", "name", "value"]
+    list_display = ["__str__", "member", "name", "set"]
     readonly_fields = ["position"]
 
     list_filter = ["name"]

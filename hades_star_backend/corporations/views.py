@@ -109,7 +109,7 @@ class CorporationViewSet(
 
         try:
             corp_filter = corporation.corporation_filter.get(id=filter_id_to_delete)
-            # corp_filter.delete()
+            corp_filter.delete()
             resp_status = status.HTTP_204_NO_CONTENT
         except corp_filter.DoesNotExist:
             resp_status = status.HTTP_404_NOT_FOUND
