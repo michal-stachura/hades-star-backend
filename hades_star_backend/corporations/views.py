@@ -98,6 +98,28 @@ class CorporationViewSet(
         )
 
     @action(
+        detail=True, methods=["patch"], url_path="edit-filter", url_name="edit-filter"
+    )
+    def edit_filter(self, request, *args, **kwargs):
+        corporation = self.get_object()
+        filter_id_to_edit = request.data.get("filter_id", None)
+
+        try:
+            # TODO: Clea up this code
+            corp_filter = corporation.corporation_filter.get(id=filter_id_to_edit)
+            corp_filter.name = request.data.get("name", "")
+            corp_filter.conditions = request.data.get("conditions", {})
+            corp_filter.save()
+            serializer = FilterSerializer(corp_filter)
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        except Filter.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(
         detail=True,
         methods=["delete"],
         url_path="delete-filter",
@@ -111,7 +133,7 @@ class CorporationViewSet(
             corp_filter = corporation.corporation_filter.get(id=filter_id_to_delete)
             corp_filter.delete()
             resp_status = status.HTTP_204_NO_CONTENT
-        except corp_filter.DoesNotExist:
+        except Filter.DoesNotExist:
             resp_status = status.HTTP_404_NOT_FOUND
 
         return Response(status=resp_status)
