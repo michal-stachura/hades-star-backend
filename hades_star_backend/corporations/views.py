@@ -10,10 +10,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from hades_star_backend.corporations.models import Corporation
+from hades_star_backend.corporations.models import Corporation, Filter
 from hades_star_backend.corporations.serializers import (
     CorporationDetailSerializer,
     CorporationSerializer,
+    FilterSerializer,
 )
 from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 
@@ -26,7 +27,9 @@ class CorporationViewSet(
     CreateModelMixin,
 ):
     queryset = (
-        Corporation.objects.prefetch_related("corporation_members")
+        Corporation.objects.prefetch_related(
+            "corporation_members", "corporation_filter"
+        )
         .all()
         .order_by("name")
     )
@@ -80,3 +83,57 @@ class CorporationViewSet(
             {"status_text": "Please provide a new secret"},
             status=status.HTTP_403_FORBIDDEN,
         )
+
+    @action(detail=True, methods=["post"], url_path="add-filter", url_name="add-filter")
+    def add_filter(self, request, *args, **kwargs):
+        filter = Filter.objects.create(
+            name=request.data.get("name", ""),
+            corporation=self.get_object(),
+            conditions=request.data.get("conditions", {}),
+        )
+        serializer = FilterSerializer(filter)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True, methods=["patch"], url_path="edit-filter", url_name="edit-filter"
+    )
+    def edit_filter(self, request, *args, **kwargs):
+        corporation = self.get_object()
+        filter_id_to_edit = request.data.get("filter_id", None)
+
+        try:
+            # TODO: Clea up this code
+            corp_filter = corporation.corporation_filter.get(id=filter_id_to_edit)
+            corp_filter.name = request.data.get("name", "")
+            corp_filter.conditions = request.data.get("conditions", {})
+            corp_filter.save()
+            serializer = FilterSerializer(corp_filter)
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        except Filter.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path="delete-filter",
+        url_name="delete-filter",
+    )
+    def delete_filter(self, request, *args, **kwargs):
+        corporation = self.get_object()
+        filter_id_to_delete = request.data.get("filter_id", None)
+
+        try:
+            corp_filter = corporation.corporation_filter.get(id=filter_id_to_delete)
+            corp_filter.delete()
+            resp_status = status.HTTP_204_NO_CONTENT
+        except Filter.DoesNotExist:
+            resp_status = status.HTTP_404_NOT_FOUND
+
+        return Response(status=resp_status)
