@@ -12,6 +12,7 @@ class Corporation(CommonModel):
     discord = models.URLField(null=True, blank=True)
     ws_wins = models.PositiveSmallIntegerField(default=0)
     secret = models.CharField(max_length=20, null=False)
+    server_id = models.PositiveBigIntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name}"

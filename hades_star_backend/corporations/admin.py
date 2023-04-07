@@ -17,7 +17,7 @@ class CorporationAdmin(admin.ModelAdmin):
 
     list_filter = ["level"]
 
-    search_fields = ["id", "name"]
+    search_fields = ["id", "name", "server_id"]
 
 
 @admin.register(Filter)
