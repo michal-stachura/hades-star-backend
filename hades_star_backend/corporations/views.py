@@ -145,10 +145,9 @@ class CorporationViewSet(
     )
     def sync_members(self, request, *args, **kwargs):
         corporation = self.get_object()
-        if corporation.server_id:
-            print(corporation.server_id)
+        if corporation.role_id:
             res = requests.get(
-                f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.server_id}&rolename=bloodtide"  # noqa E501
+                f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.role_id}&rolename=bloodtide"  # noqa E501
             )
             if res.status_code == 200:
                 data = res.json()
