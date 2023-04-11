@@ -12,7 +12,16 @@ class Corporation(CommonModel):
     discord = models.URLField(null=True, blank=True)
     ws_wins = models.PositiveSmallIntegerField(default=0)
     secret = models.CharField(max_length=20, null=False)
-    server_id = models.PositiveBigIntegerField(null=True, blank=True)
+    server_id = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(server_id__gte=0),
+                name="corporation_server_id__gte_0",
+                violation_error_message="Server ID must be positive integer number",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.name}"

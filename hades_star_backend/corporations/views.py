@@ -1,3 +1,5 @@
+import requests
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (
@@ -137,3 +139,21 @@ class CorporationViewSet(
             resp_status = status.HTTP_404_NOT_FOUND
 
         return Response(status=resp_status)
+
+    @action(
+        detail=True, methods=["get"], url_path="sync-members", url_name="sync-members"
+    )
+    def sync_members(self, request, *args, **kwargs):
+        corporation = self.get_object()
+        if corporation.server_id:
+            print(corporation.server_id)
+            res = requests.get(
+                f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.server_id}&rolename=bloodtide"  # noqa E501
+            )
+            if res.status_code == 200:
+                data = res.json()
+                return Response(res.json(), status=res.status_code)
+
+            else:
+                return Response(res.json(), status=res.status_code)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
