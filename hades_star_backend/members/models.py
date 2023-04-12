@@ -52,6 +52,16 @@ class Member(CommonModel):
     max_mods = models.PositiveSmallIntegerField(default=1)
     bs_level = models.PositiveSmallIntegerField(default=1)
     as_leader = models.BooleanField(default=False)
+    hsc_id = models.CharField(max_length=20, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(hsc_id__gte=0),
+                name="member_hsc_id__gte_0",
+                violation_error_message="HSC ID must be positive integer number",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.name}"

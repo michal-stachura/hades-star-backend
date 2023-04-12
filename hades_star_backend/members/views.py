@@ -31,7 +31,7 @@ class MemberViewSet(
     ]
 
     def create(self, request, *args, **kwargs):
-        corporation_id = request.data.get("corporation", None)
+        corporation_id = request.data.get("corporation_id", None)
         if not corporation_id:
             return Response(
                 {"detail": "Please provide member's corporation"},

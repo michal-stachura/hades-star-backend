@@ -18,6 +18,7 @@ from hades_star_backend.corporations.serializers import (
     CorporationSerializer,
     FilterSerializer,
 )
+from hades_star_backend.members.models import Member
 from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 
 
@@ -141,18 +142,55 @@ class CorporationViewSet(
         return Response(status=resp_status)
 
     @action(
-        detail=True, methods=["get"], url_path="sync-members", url_name="sync-members"
+        detail=True,
+        methods=["get", "post"],
+        url_path="sync-members",
+        url_name="sync-members",
     )
     def sync_members(self, request, *args, **kwargs):
         corporation = self.get_object()
-        if corporation.role_id:
-            res = requests.get(
-                f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.role_id}&rolename=bloodtide"  # noqa E501
-            )
-            if res.status_code == 200:
-                data = res.json()
-                return Response(res.json(), status=res.status_code)
 
-            else:
-                return Response(res.json(), status=res.status_code)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        if request.method == "GET":
+            if corporation.role_id:
+                res = requests.get(
+                    f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.role_id}&rolename=bloodtide"  # noqa E501
+                )
+                if res.status_code == 200:
+                    data = res.json()
+                    return Response(res.json(), status=res.status_code)
+
+                else:
+                    return Response(res.json(), status=res.status_code)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == "POST":
+
+            current_members_hsc_ids = list(
+                set(
+                    corporation.corporation_members.all().values_list(
+                        "hsc_id", flat=True
+                    )
+                )
+            )
+            selected_members = request.data.get("selected_members", [])
+            members_to_add = []
+            for member in selected_members:
+                if member["id"] not in current_members_hsc_ids:
+                    members_to_add.append(
+                        Member(
+                            name=member["name"],
+                            hsc_id=member["id"],
+                            time_zone=member["tz_name"],
+                        )
+                    )
+
+            if members_to_add != []:
+                created_members = Member.objects.bulk_create(members_to_add)
+
+                for member in created_members:
+                    member.corporation.add(corporation)
+
+            # TODO: create members tech levels (use is_being_created on member.save instead of veryfying tech objects).
+            # FIXME: problem with oridinary add members to corporation
+
+            return Response({"msg": "ok"}, status=status.HTTP_201_CREATED)
