@@ -37,8 +37,11 @@ class Member(CommonModel):
     ]
 
     name = models.CharField(max_length=50, null=False)
-    corporation = models.ManyToManyField(
-        Corporation, blank=True, related_name="corporation_members"
+    corporation = models.ForeignKey(
+        Corporation,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="corporation_members",
     )
     time_zone = models.CharField(max_length=32, choices=TIMEZONES, default="UTC")
     rs_level = models.PositiveSmallIntegerField(default=0)
@@ -66,17 +69,19 @@ class Member(CommonModel):
     def __str__(self) -> str:
         return f"{self.name}"
 
-    def __create_base_attributes(self):
+    def create_base_attributes(self, hsc_tech: object | None = None) -> None:
         new_items = []
         # Weapon
         attributes = ShipAttribute("weapon")
         for attribute in attributes.get_attributes():
+            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Weapon(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
                     position=attributes.get_attribure_index(attribute[0]),
+                    set=tech_level,
                 )
             )
         Weapon.objects.bulk_create(new_items)
@@ -146,9 +151,9 @@ class Member(CommonModel):
 
     def save(self, *args, **kwargs):
 
+        if self.is_being_created is True:
+            self.create_base_attributes()
         super().save(*args, **kwargs)
-        if not Weapon.objects.filter(member=self).exists():
-            self.__create_base_attributes()
 
 
 class AtributeCommonModel(models.Model):

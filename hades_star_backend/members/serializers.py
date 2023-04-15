@@ -43,6 +43,7 @@ class MemberDetailSerializer(MemberSerializer):
             "bs_level",
             "as_leader",
             "attributes",
+            "hsc_id",
             "is_visible",
         ]
 

@@ -6,18 +6,16 @@ from hades_star_backend.corporations.models import Corporation
 class CorporationObjectSecretCheck(permissions.BasePermission):
     def has_object_permission(self, request, view, object) -> bool:
         header_secret = request.headers.get("Corporation-Secret", None)
-        corporation_id = request.data.get(
-            "corporation_id", request.data.get("corporation", None)
-        )
         corporation = None
 
         if isinstance(object, Corporation):
             corporation = object
         else:
+            corporation_id = request.data.get("corporation", None)
             if corporation_id:
                 try:
-                    corporation = object.corporation.all().get(id=corporation_id)
-                except corporation.DoesNotExist:
+                    corporation = Corporation.objects.get(id=corporation_id)
+                except Corporation.DoesNotExist:
                     pass
 
         if corporation:
