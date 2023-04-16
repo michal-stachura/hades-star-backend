@@ -181,6 +181,14 @@ class CorporationViewSet(
                             hsc_id=member["id"],
                             time_zone=member["tz_name"] if member["tz_name"] else "UTC",
                             corporation=corporation,
+                            rs_level=member["tech"]["rs"] if "tech" in member else 0,
+                            bs_level=member["tech"]["bs"] if "tech" in member else 1,
+                            miner_level=member["tech"]["miner"]
+                            if "tech" in member
+                            else 1,
+                            transport_level=member["tech"]["transp"]
+                            if "tech" in member
+                            else 1,
                         )
                     )
 
@@ -188,13 +196,23 @@ class CorporationViewSet(
                 Member.objects.bulk_create(members_to_add)
 
                 for member in members_to_add:
-                    # TODO: Filter hsc_tech levels for each member and set members tech levels based on it
+                    try:
+                        hsc_tech = list(
+                            filter(
+                                lambda item: item["id"] == member.hsc_id,
+                                selected_members,
+                            )
+                        )[0]
+                    except IndexError:
+                        hsc_tech = None
+
+                    # FIXME: set timezones based on offset or convert tz_name
                     """
                     Example selected_members array to filter via `id`
 
-                    [{'name': 'Mycah Payne - Bloodtide', 'id': '794294626781364254', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085}]
+                    [{'name': 'Mycah Payne - Bloodtide', 'id': '123', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085},{'name': 'Mycah Payne - Bloodtide', 'id': '124', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085},{'name': 'Mycah Payne - Bloodtide', 'id': '125', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085}]
                     """  # noqa E501
-                    member.create_base_attributes()
+                    member.create_base_attributes(hsc_tech)
 
             serializer = CorporationDetailSerializer(corporation)
 

@@ -96,6 +96,9 @@ class ShipAttribute:
             for attribute in self.attributes[self.group_name]
         ]
 
+    def get_attributes_with_hsc_id(self) -> tuple:
+        return self.attributes[self.group_name]
+
     def get_default_attribute(self) -> str:
         return self.attributes[self.group_name][0][0]
 

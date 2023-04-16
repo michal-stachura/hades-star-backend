@@ -52,8 +52,9 @@ class Member(CommonModel):
         null=True,
     )
     next_ws = models.CharField(max_length=1, blank=True, choices=NEXT_WS_PREFERENCES)
-    max_mods = models.PositiveSmallIntegerField(default=1)
     bs_level = models.PositiveSmallIntegerField(default=1)
+    miner_level = models.PositiveSmallIntegerField(default=1)
+    transport_level = models.PositiveBigIntegerField(default=1)
     as_leader = models.BooleanField(default=False)
     hsc_id = models.CharField(max_length=20, blank=True, null=True)
 
@@ -73,7 +74,7 @@ class Member(CommonModel):
         new_items = []
         # Weapon
         attributes = ShipAttribute("weapon")
-        for attribute in attributes.get_attributes():
+        for attribute in attributes.get_attributes_with_hsc_id():
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Weapon(
@@ -89,13 +90,15 @@ class Member(CommonModel):
         new_items = []
         # Shield
         attributes = ShipAttribute("shield")
-        for attribute in attributes.get_attributes():
+        for attribute in attributes.get_attributes_with_hsc_id():
+            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Shield(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
                     position=attributes.get_attribure_index(attribute[0]),
+                    set=tech_level,
                 )
             )
         Shield.objects.bulk_create(new_items)
@@ -103,13 +106,15 @@ class Member(CommonModel):
         new_items = []
         # Support
         attributes = ShipAttribute("support")
-        for attribute in attributes.get_attributes():
+        for attribute in attributes.get_attributes_with_hsc_id():
+            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Support(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
                     position=attributes.get_attribure_index(attribute[0]),
+                    set=tech_level,
                 )
             )
         Support.objects.bulk_create(new_items)
@@ -117,13 +122,15 @@ class Member(CommonModel):
         new_items = []
         # Mining
         attributes = ShipAttribute("mining")
-        for attribute in attributes.get_attributes():
+        for attribute in attributes.get_attributes_with_hsc_id():
+            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Mining(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
                     position=attributes.get_attribure_index(attribute[0]),
+                    set=tech_level,
                 )
             )
         Mining.objects.bulk_create(new_items)
@@ -131,13 +138,15 @@ class Member(CommonModel):
         new_items = []
         # Trade
         attributes = ShipAttribute("trade")
-        for attribute in attributes.get_attributes():
+        for attribute in attributes.get_attributes_with_hsc_id():
+            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Trade(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
                     position=attributes.get_attribure_index(attribute[0]),
+                    set=tech_level,
                 )
             )
         Trade.objects.bulk_create(new_items)
