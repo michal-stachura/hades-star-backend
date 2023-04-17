@@ -143,6 +143,43 @@ class CorporationViewSet(
 
     @action(
         detail=True,
+        methods=["get"],
+        url_path="sync-tech",
+        url_name="sync-tech",
+    )
+    def sync_tech(self, request, *args, **kwargs):
+        corporation = self.get_object()
+        if corporation.role_id:
+            current_members_hsc_ids = corporation.get_current_members_hsc_ids()
+
+            if current_members_hsc_ids != []:
+                members_to_update = []
+                members_with_hsc_id = corporation.corporation_members.filter(
+                    hsc_id__in=current_members_hsc_ids
+                )
+                res = requests.get(
+                    f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.role_id}&rolename=bloodtide"  # noqa E501
+                )
+                hsc_members = res.json() if res.status_code == 200 else []
+                for member in members_with_hsc_id:
+                    try:
+                        hsc_tech = list(
+                            filter(
+                                lambda item: item["id"] == member.hsc_id,
+                                hsc_members["data"],
+                            )
+                        )[0]
+                        # TODO: Add update_attributes method to Member model
+                        member.update_attributes(hsc_tech)
+                    except IndexError:
+                        continue
+
+            print(corporation.get_current_members_hsc_ids())
+            return Response("ok")
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
         methods=["get", "post"],
         url_path="sync-members",
         url_name="sync-members",
@@ -155,22 +192,12 @@ class CorporationViewSet(
                 res = requests.get(
                     f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.role_id}&rolename=bloodtide"  # noqa E501
                 )
-                if res.status_code == 200:
-                    return Response(res.json(), status=res.status_code)
-
-                else:
-                    return Response(res.json(), status=res.status_code)
+                return Response(res.json(), status=res.status_code)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == "POST":
 
-            current_members_hsc_ids = list(
-                set(
-                    corporation.corporation_members.all().values_list(
-                        "hsc_id", flat=True
-                    )
-                )
-            )
+            current_members_hsc_ids = corporation.get_current_members_hsc_ids()
             selected_members = request.data.get("selected_members", [])
             members_to_add = []
             for member in selected_members:
@@ -204,10 +231,9 @@ class CorporationViewSet(
                                 selected_members,
                             )
                         )[0]
+                        member.create_base_attributes(hsc_tech)
                     except IndexError:
-                        hsc_tech = None
-
-                    member.create_base_attributes(hsc_tech)
+                        continue
 
             serializer = CorporationDetailSerializer(corporation)
 

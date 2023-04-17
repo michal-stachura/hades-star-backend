@@ -33,6 +33,13 @@ class Corporation(CommonModel):
         self.secret = new_secret
         self.save()
 
+    def get_current_members_hsc_ids(self):
+        # List of members HadesStar Compendium IDs
+        members_hsc_ids = list(
+            set(self.corporation_members.all().values_list("hsc_id", flat=True))
+        )
+        return [x for x in members_hsc_ids if x is not None]
+
 
 class Filter(CommonModel):
 
