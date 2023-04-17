@@ -174,12 +174,13 @@ class CorporationViewSet(
             selected_members = request.data.get("selected_members", [])
             members_to_add = []
             for member in selected_members:
+                tz_offset = member["tz_offset"] if "tz_offset" in member else None
                 if member["id"] not in current_members_hsc_ids:
                     members_to_add.append(
                         Member(
                             name=member["name"],
                             hsc_id=member["id"],
-                            time_zone=member["tz_name"] if member["tz_name"] else "UTC",
+                            time_zone=Member.find_timezone_name(tz_offset),
                             corporation=corporation,
                             rs_level=member["tech"]["rs"] if "tech" in member else 0,
                             bs_level=member["tech"]["bs"] if "tech" in member else 1,
@@ -206,12 +207,6 @@ class CorporationViewSet(
                     except IndexError:
                         hsc_tech = None
 
-                    # FIXME: set timezones based on offset or convert tz_name
-                    """
-                    Example selected_members array to filter via `id`
-
-                    [{'name': 'Mycah Payne - Bloodtide', 'id': '123', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085},{'name': 'Mycah Payne - Bloodtide', 'id': '124', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085},{'name': 'Mycah Payne - Bloodtide', 'id': '125', 'tz_name': 'UTC-5', 'tz_offset': -300, 'tech': {'rs': 9, 'shipmentrelay': 8, 'corplevel': 13, 'transp': 5, 'miner': 6, 'bs': 5, 'cargobay': 10, 'computer': 7, 'tradeboost': 4, 'rush': 4, 'tradeburst': 4, 'shipdrone': 9, 'offload': 1, 'beam': 1, 'entrust': 1, 'recall': 0, 'dispatch': 7, 'relicdrone': 5, 'miningboost': 8, 'hydrobay': 8, 'enrich': 9, 'remote': 8, 'hydroupload': 8, 'miningunity': 8, 'crunch': 6, 'genesis': 6, 'minedrone': 2, 'hydrorocket': 0, 'battery': 10, 'laser': 7, 'mass': 8, 'dual': 6, 'barrage': 8, 'dart': 1, 'alpha': 5, 'delta': 9, 'passive': 6, 'omega': 7, 'mirror': 4, 'blast': 7, 'area': 1, 'emp': 7, 'teleport': 9, 'rsextender': 7, 'repair': 7, 'warp': 9, 'unity': 5, 'sanctuary': 1, 'stealth': 5, 'fortify': 8, 'impulse': 8, 'rocket': 7, 'salvage': 8, 'suppress': 8, 'destiny': 8, 'barrier': 8, 'vengeance': 2, 'deltarocket': 5, 'leap': 5, 'bond': 4, 'alphadrone': 2, 'omegarocket': 1, 'suspend': 0, 'remotebomb': 0, 'laserturret': 0}, 'ws': 42085}]
-                    """  # noqa E501
                     member.create_base_attributes(hsc_tech)
 
             serializer = CorporationDetailSerializer(corporation)

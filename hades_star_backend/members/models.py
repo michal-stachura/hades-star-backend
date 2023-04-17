@@ -1,3 +1,6 @@
+import random
+from datetime import datetime
+
 import pytz
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -157,6 +160,24 @@ class Member(CommonModel):
             self.corporation.remove(corporation)
             return True
         return False
+
+    def find_timezone_name(offset_minutes: int) -> str:
+        if offset_minutes is None:
+            return "UTC"
+        offset_seconds = offset_minutes * 60
+        possible_timezones = []
+
+        for tz in pytz.common_timezones:
+            timezone = pytz.timezone(tz)
+            try:
+                tz_offset = timezone.utcoffset(datetime.utcnow()).total_seconds()
+            except AttributeError:
+                continue
+            if tz_offset == offset_seconds:
+                possible_timezones.append(tz)
+        if offset_minutes is not None and possible_timezones != []:
+            return random.choice(possible_timezones)
+        return "UTC"
 
     def save(self, *args, **kwargs):
 
