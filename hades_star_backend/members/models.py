@@ -2,6 +2,7 @@ import random
 from datetime import datetime
 
 import pytz
+from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
@@ -74,18 +75,33 @@ class Member(CommonModel):
         return f"{self.name}"
 
     def update_attributes(self, hsc_tech: object) -> None:
+        attributes = ShipAttribute()
+        for key in attributes.get_all_keys():
+            group_attributes = attributes.get_attributes(
+                group_name=key, with_hsc_id=True
+            )
+            AttributeModel = key
+            attributes_to_update = []
+            for attribute in group_attributes:
+                attribute_hsc_id = attributes.get_attribute(attribute.name)[2]
+            weapon.set = hsc_tech["tech"][attribute_hsc_id]
+            weapons_to_update.append(weapon)
+        WeaponModel.objects.bulk_update(weapons_to_update, ["set"])
+
         # Weapon
-        attributes = ShipAttribute("weapon")
+        attributes = ShipAttribute("Weapon")
         members_weapons = self.members_weapon.all()
         weapons_to_update = []
+        model_name = "Weapon"
+        WeaponModel = apps.get_model("members", model_name)
         for weapon in members_weapons:
             attribute_hsc_id = attributes.get_attribute(weapon.name)[2]
             weapon.set = hsc_tech["tech"][attribute_hsc_id]
             weapons_to_update.append(weapon)
-        Weapon.objects.bulk_update(weapons_to_update, ["set"])
+        WeaponModel.objects.bulk_update(weapons_to_update, ["set"])
 
         # Shield
-        attributes = ShipAttribute("shield")
+        attributes = ShipAttribute("Shield")
         members_shields = self.members_shield.all()
         shields_to_update = []
         for shield in members_shields:
@@ -95,7 +111,7 @@ class Member(CommonModel):
         Shield.objects.bulk_update(shields_to_update, ["set"])
 
         # Support
-        attributes = ShipAttribute("support")
+        attributes = ShipAttribute("Support")
         members_supports = self.members_support.all()
         supports_to_update = []
         for support in members_supports:
@@ -105,7 +121,7 @@ class Member(CommonModel):
         Support.objects.bulk_update(supports_to_update, ["set"])
 
         # Mining
-        attributes = ShipAttribute("mining")
+        attributes = ShipAttribute("Mining")
         members_minings = self.members_mining.all()
         minings_to_update = []
         for mining in members_minings:
@@ -115,7 +131,7 @@ class Member(CommonModel):
         Mining.objects.bulk_update(minings_to_update, ["set"])
 
         # Trade
-        attributes = ShipAttribute("trade")
+        attributes = ShipAttribute("Trade")
         members_trades = self.members_trade.all()
         trades_to_update = []
         for trade in members_trades:
@@ -127,7 +143,7 @@ class Member(CommonModel):
     def create_base_attributes(self, hsc_tech: object | None = None) -> None:
         new_items = []
         # Weapon
-        attributes = ShipAttribute("weapon")
+        attributes = ShipAttribute("Weapon")
         for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
@@ -143,7 +159,7 @@ class Member(CommonModel):
 
         new_items = []
         # Shield
-        attributes = ShipAttribute("shield")
+        attributes = ShipAttribute("Shield")
         for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
@@ -159,7 +175,7 @@ class Member(CommonModel):
 
         new_items = []
         # Support
-        attributes = ShipAttribute("support")
+        attributes = ShipAttribute("Support")
         for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
@@ -175,7 +191,7 @@ class Member(CommonModel):
 
         new_items = []
         # Mining
-        attributes = ShipAttribute("mining")
+        attributes = ShipAttribute("Mining")
         for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
@@ -191,7 +207,7 @@ class Member(CommonModel):
 
         new_items = []
         # Trade
-        attributes = ShipAttribute("trade")
+        attributes = ShipAttribute("Trade")
         for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
@@ -266,32 +282,32 @@ class AtributeCommonModel(models.Model):
 
 
 class Weapon(AtributeCommonModel):
-    attributes = ShipAttribute("weapon")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Weapon"),
+        default=attributes.get_default_attribute("Weapon"),
     )
 
 
 class Shield(AtributeCommonModel):
-    attributes = ShipAttribute("shield")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Shield"),
+        default=attributes.get_default_attribute("Shield"),
     )
 
 
 class Support(AtributeCommonModel):
-    attributes = ShipAttribute("support")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Support"),
+        default=attributes.get_default_attribute("Support"),
     )
 
     class Meta(AtributeCommonModel.Meta):
@@ -335,20 +351,20 @@ class Support(AtributeCommonModel):
 
 
 class Mining(AtributeCommonModel):
-    attributes = ShipAttribute("mining")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Mining"),
+        default=attributes.get_default_attribute("Mining"),
     )
 
 
 class Trade(AtributeCommonModel):
-    attributes = ShipAttribute("trade")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Trade"),
+        default=attributes.get_default_attribute("Trade"),
     )

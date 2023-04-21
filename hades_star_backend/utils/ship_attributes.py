@@ -1,7 +1,7 @@
 class ShipAttribute:
 
     attributes = {
-        "weapon": [
+        "Weapon": [
             ("BATTERY", "Battery", "battery"),
             ("LASER", "Laser", "laser"),
             ("MASS_BATTERY", "Mass Battery", "mass"),
@@ -9,7 +9,7 @@ class ShipAttribute:
             ("BARRAGE", "Barrage", "barrage"),
             ("DART_LAUNCHER", "Dart Launcher", "dart"),
         ],
-        "shield": [
+        "Shield": [
             ("DELTA_SHIELD", "Delta Shield", "delta"),
             ("PASSIVE_SHIELD", "Passive Shield", "passive"),
             ("OMEGA_SHIELD", "Omega Shield", "omega"),
@@ -17,7 +17,7 @@ class ShipAttribute:
             ("BLAST_SHIELD", "Blast Shield", "blast"),
             ("AREA_SHIELD", "Area Shield", "area"),
         ],
-        "support": [
+        "Support": [
             ("EMP", "Emp", "emp"),
             ("TELEPORT", "Teleport", "teleport"),
             ("RED_STAR_LIFE_EXTENDER", "Red Star life extender", "rsextender"),
@@ -43,7 +43,7 @@ class ShipAttribute:
             ("OMEGA_ROCKET", "Omega rocket", "omegarocket"),
             ("REMOTE_BOMB", "Remote bomb", "remotebomb"),
         ],
-        "mining": [
+        "Mining": [
             ("MINING_BOOST", "Mining boost", "miningboost"),
             ("HYDROGEN_BAY_EXTENSION", "Hydrogen Bay extension", "hydrobay"),
             ("ENRICH", "Enrich", "enrich"),
@@ -55,7 +55,7 @@ class ShipAttribute:
             ("HYDROGEN_ROCKET", "Hydrogen rocket", "hydrorocket"),
             ("MINING_DRONE", "Mining drone", "minedrone"),
         ],
-        "trade": [
+        "Trade": [
             ("CARGO_BAY_EXTENSION", "Cargo Bay Extension", "cargobay"),
             ("SHIPMENT_COMPUTER", "Shipment Computer", "computer"),
             ("TRADE_BOOST", "Trade Boost", "tradeboost"),
@@ -71,8 +71,9 @@ class ShipAttribute:
         ],
     }
 
-    def __init__(self, group_name: str) -> None:
+    def __init__(self, group_name: str | None = None) -> None:
         self.group_name = group_name
+        self.all_keys = self.attributes.keys()
 
     def __convert_attribute_to_dict(self, attribute):
         return {
@@ -83,26 +84,27 @@ class ShipAttribute:
         }
 
     def find_group_name_by_attribute_name(self, attribute_name: str) -> str | None:
-        for key in self.attributes.keys():
+        for key in self.all_keys:
             test = list(filter(lambda x: x[0] == attribute_name, self.attributes[key]))
             if len(test) > 0:
                 return key
         return None
 
-    def get_attributes(self, with_hsc_id=False) -> tuple:
+    def get_attributes(self, group_name: str, with_hsc_id: bool = False) -> tuple:
         attributes = []
 
         if not with_hsc_id:
-            attributes += [
-                (attr[0], attr[1]) for attr in self.attributes[self.group_name]
-            ]
+            attributes += [(attr[0], attr[1]) for attr in self.attributes[group_name]]
         else:
-            attributes += [attr for attr in self.attributes[self.group_name]]
+            attributes += [attr for attr in self.attributes[group_name]]
 
         return attributes
 
-    def get_default_attribute(self) -> str:
-        return self.attributes[self.group_name][0][0]
+    def get_default_attribute(
+        self,
+        group_name: str,
+    ) -> str:
+        return self.attributes[group_name][0][0]
 
     def get_attribute_index(self, attribute_name: str) -> int:
         attributes = self.get_attributes()
@@ -141,3 +143,6 @@ class ShipAttribute:
             )
 
         return attributes_dict
+
+    def get_all_keys(self) -> list:
+        return self.all_keys
