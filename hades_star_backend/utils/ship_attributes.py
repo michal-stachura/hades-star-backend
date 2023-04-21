@@ -71,9 +71,8 @@ class ShipAttribute:
         ],
     }
 
-    def __init__(self, group_name: str | None = None) -> None:
-        if group_name:
-            self.group_name = group_name
+    def __init__(self, group_name: str) -> None:
+        self.group_name = group_name
 
     def __convert_attribute_to_dict(self, attribute):
         return {
@@ -90,21 +89,30 @@ class ShipAttribute:
                 return key
         return None
 
-    def get_attributes(self) -> tuple:
-        return [
-            (attribute[0], attribute[1])
-            for attribute in self.attributes[self.group_name]
-        ]
+    def get_attributes(self, with_hsc_id=False) -> tuple:
+        attributes = []
 
-    def get_attributes_with_hsc_id(self) -> tuple:
-        return self.attributes[self.group_name]
+        if not with_hsc_id:
+            attributes += [
+                (attr[0], attr[1]) for attr in self.attributes[self.group_name]
+            ]
+        else:
+            attributes += [attr for attr in self.attributes[self.group_name]]
+
+        return attributes
 
     def get_default_attribute(self) -> str:
         return self.attributes[self.group_name][0][0]
 
-    def get_attribure_index(self, attribute_name: str) -> int:
+    def get_attribute_index(self, attribute_name: str) -> int:
         attributes = self.get_attributes()
         return [x[0] for x in attributes].index(attribute_name)
+
+    def get_attribute(self, attribute_name: str) -> tuple:
+        attributes = self.get_attributes(with_hsc_id=True)
+        index = self.get_attribute_index(attribute_name)
+
+        return attributes[index]
 
     def get_maximum_value(self, attribute_name: str) -> int:
         if attribute_name in ["SANCTUARY", "RECALL"]:

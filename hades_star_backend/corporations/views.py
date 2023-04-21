@@ -153,7 +153,6 @@ class CorporationViewSet(
             current_members_hsc_ids = corporation.get_current_members_hsc_ids()
 
             if current_members_hsc_ids != []:
-                members_to_update = []
                 members_with_hsc_id = corporation.corporation_members.filter(
                     hsc_id__in=current_members_hsc_ids
                 )
@@ -169,13 +168,13 @@ class CorporationViewSet(
                                 hsc_members["data"],
                             )
                         )[0]
-                        # TODO: Add update_attributes method to Member model
                         member.update_attributes(hsc_tech)
                     except IndexError:
                         continue
 
-            print(corporation.get_current_members_hsc_ids())
-            return Response("ok")
+            serializer = CorporationDetailSerializer(corporation)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(

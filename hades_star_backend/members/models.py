@@ -73,18 +73,69 @@ class Member(CommonModel):
     def __str__(self) -> str:
         return f"{self.name}"
 
+    def update_attributes(self, hsc_tech: object) -> None:
+        # Weapon
+        attributes = ShipAttribute("weapon")
+        members_weapons = self.members_weapon.all()
+        weapons_to_update = []
+        for weapon in members_weapons:
+            attribute_hsc_id = attributes.get_attribute(weapon.name)[2]
+            weapon.set = hsc_tech["tech"][attribute_hsc_id]
+            weapons_to_update.append(weapon)
+        Weapon.objects.bulk_update(weapons_to_update, ["set"])
+
+        # Shield
+        attributes = ShipAttribute("shield")
+        members_shields = self.members_shield.all()
+        shields_to_update = []
+        for shield in members_shields:
+            attribute_hsc_id = attributes.get_attribute(shield.name)[2]
+            shield.set = hsc_tech["tech"][attribute_hsc_id]
+            shields_to_update.append(shield)
+        Shield.objects.bulk_update(shields_to_update, ["set"])
+
+        # Support
+        attributes = ShipAttribute("support")
+        members_supports = self.members_support.all()
+        supports_to_update = []
+        for support in members_supports:
+            attribute_hsc_id = attributes.get_attribute(support.name)[2]
+            support.set = hsc_tech["tech"][attribute_hsc_id]
+            supports_to_update.append(support)
+        Support.objects.bulk_update(supports_to_update, ["set"])
+
+        # Mining
+        attributes = ShipAttribute("mining")
+        members_minings = self.members_mining.all()
+        minings_to_update = []
+        for mining in members_minings:
+            attribute_hsc_id = attributes.get_attribute(mining.name)[2]
+            mining.set = hsc_tech["tech"][attribute_hsc_id]
+            minings_to_update.append(mining)
+        Mining.objects.bulk_update(minings_to_update, ["set"])
+
+        # Trade
+        attributes = ShipAttribute("trade")
+        members_trades = self.members_trade.all()
+        trades_to_update = []
+        for trade in members_trades:
+            attribute_hsc_id = attributes.get_attribute(trade.name)[2]
+            trade.set = hsc_tech["tech"][attribute_hsc_id]
+            trades_to_update.append(trade)
+        Trade.objects.bulk_update(trades_to_update, ["set"])
+
     def create_base_attributes(self, hsc_tech: object | None = None) -> None:
         new_items = []
         # Weapon
         attributes = ShipAttribute("weapon")
-        for attribute in attributes.get_attributes_with_hsc_id():
+        for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Weapon(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
+                    position=attributes.get_attribute_index(attribute[0]),
                     set=tech_level,
                 )
             )
@@ -93,14 +144,14 @@ class Member(CommonModel):
         new_items = []
         # Shield
         attributes = ShipAttribute("shield")
-        for attribute in attributes.get_attributes_with_hsc_id():
+        for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Shield(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
+                    position=attributes.get_attribute_index(attribute[0]),
                     set=tech_level,
                 )
             )
@@ -109,14 +160,14 @@ class Member(CommonModel):
         new_items = []
         # Support
         attributes = ShipAttribute("support")
-        for attribute in attributes.get_attributes_with_hsc_id():
+        for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Support(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
+                    position=attributes.get_attribute_index(attribute[0]),
                     set=tech_level,
                 )
             )
@@ -125,14 +176,14 @@ class Member(CommonModel):
         new_items = []
         # Mining
         attributes = ShipAttribute("mining")
-        for attribute in attributes.get_attributes_with_hsc_id():
+        for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Mining(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
+                    position=attributes.get_attribute_index(attribute[0]),
                     set=tech_level,
                 )
             )
@@ -141,14 +192,14 @@ class Member(CommonModel):
         new_items = []
         # Trade
         attributes = ShipAttribute("trade")
-        for attribute in attributes.get_attributes_with_hsc_id():
+        for attribute in attributes.get_attributes(with_hsc_id=True):
             tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
             new_items.append(
                 Trade(
                     member=self,
                     name=attribute[0],
                     max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
+                    position=attributes.get_attribute_index(attribute[0]),
                     set=tech_level,
                 )
             )
