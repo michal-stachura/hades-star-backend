@@ -106,13 +106,13 @@ class ShipAttribute:
     ) -> str:
         return self.attributes[group_name][0][0]
 
-    def get_attribute_index(self, attribute_name: str) -> int:
-        attributes = self.get_attributes()
+    def get_attribute_index(self, group_name: str, attribute_name: str) -> int:
+        attributes = self.get_attributes(group_name)
         return [x[0] for x in attributes].index(attribute_name)
 
-    def get_attribute(self, attribute_name: str) -> tuple:
-        attributes = self.get_attributes(with_hsc_id=True)
-        index = self.get_attribute_index(attribute_name)
+    def get_attribute(self, group_name: str, attribute_name: str) -> tuple:
+        attributes = self.get_attributes(group_name, with_hsc_id=True)
+        index = self.get_attribute_index(group_name, attribute_name)
 
         return attributes[index]
 

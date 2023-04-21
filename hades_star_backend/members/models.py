@@ -71,155 +71,37 @@ class Member(CommonModel):
             )
         ]
 
-    def __str__(self) -> str:
-        return f"{self.name}"
-
     def update_attributes(self, hsc_tech: object) -> None:
         attributes = ShipAttribute()
         for key in attributes.get_all_keys():
-            group_attributes = attributes.get_attributes(
-                group_name=key, with_hsc_id=True
-            )
-            AttributeModel = key
+            AttributeModel = apps.get_model("members", key)
             attributes_to_update = []
-            for attribute in group_attributes:
-                attribute_hsc_id = attributes.get_attribute(attribute.name)[2]
-            weapon.set = hsc_tech["tech"][attribute_hsc_id]
-            weapons_to_update.append(weapon)
-        WeaponModel.objects.bulk_update(weapons_to_update, ["set"])
+            members_attributes = self.__get_member_attributes(key)
 
-        # Weapon
-        attributes = ShipAttribute("Weapon")
-        members_weapons = self.members_weapon.all()
-        weapons_to_update = []
-        model_name = "Weapon"
-        WeaponModel = apps.get_model("members", model_name)
-        for weapon in members_weapons:
-            attribute_hsc_id = attributes.get_attribute(weapon.name)[2]
-            weapon.set = hsc_tech["tech"][attribute_hsc_id]
-            weapons_to_update.append(weapon)
-        WeaponModel.objects.bulk_update(weapons_to_update, ["set"])
-
-        # Shield
-        attributes = ShipAttribute("Shield")
-        members_shields = self.members_shield.all()
-        shields_to_update = []
-        for shield in members_shields:
-            attribute_hsc_id = attributes.get_attribute(shield.name)[2]
-            shield.set = hsc_tech["tech"][attribute_hsc_id]
-            shields_to_update.append(shield)
-        Shield.objects.bulk_update(shields_to_update, ["set"])
-
-        # Support
-        attributes = ShipAttribute("Support")
-        members_supports = self.members_support.all()
-        supports_to_update = []
-        for support in members_supports:
-            attribute_hsc_id = attributes.get_attribute(support.name)[2]
-            support.set = hsc_tech["tech"][attribute_hsc_id]
-            supports_to_update.append(support)
-        Support.objects.bulk_update(supports_to_update, ["set"])
-
-        # Mining
-        attributes = ShipAttribute("Mining")
-        members_minings = self.members_mining.all()
-        minings_to_update = []
-        for mining in members_minings:
-            attribute_hsc_id = attributes.get_attribute(mining.name)[2]
-            mining.set = hsc_tech["tech"][attribute_hsc_id]
-            minings_to_update.append(mining)
-        Mining.objects.bulk_update(minings_to_update, ["set"])
-
-        # Trade
-        attributes = ShipAttribute("Trade")
-        members_trades = self.members_trade.all()
-        trades_to_update = []
-        for trade in members_trades:
-            attribute_hsc_id = attributes.get_attribute(trade.name)[2]
-            trade.set = hsc_tech["tech"][attribute_hsc_id]
-            trades_to_update.append(trade)
-        Trade.objects.bulk_update(trades_to_update, ["set"])
+            for attribute in members_attributes:
+                attribute_hsc_id = attributes.get_attribute(key, attribute.name)[2]
+                attribute.set = hsc_tech["tech"][attribute_hsc_id]
+                attributes_to_update.append(attribute)
+            AttributeModel.objects.bulk_update(attributes_to_update, ["set"])
 
     def create_base_attributes(self, hsc_tech: object | None = None) -> None:
-        new_items = []
-        # Weapon
-        attributes = ShipAttribute("Weapon")
-        for attribute in attributes.get_attributes(with_hsc_id=True):
-            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
-            new_items.append(
-                Weapon(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribute_index(attribute[0]),
-                    set=tech_level,
-                )
-            )
-        Weapon.objects.bulk_create(new_items)
+        attributes = ShipAttribute()
+        for key in attributes.get_all_keys():
+            AttributeModel = apps.get_model("members", key)
+            attributes_to_create = []
 
-        new_items = []
-        # Shield
-        attributes = ShipAttribute("Shield")
-        for attribute in attributes.get_attributes(with_hsc_id=True):
-            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
-            new_items.append(
-                Shield(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribute_index(attribute[0]),
-                    set=tech_level,
+            for attribute in attributes.get_attributes(key, with_hsc_id=True):
+                tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
+                attributes_to_create.append(
+                    AttributeModel(
+                        member=self,
+                        name=attribute[0],
+                        max=attributes.get_maximum_value(attribute[0]),
+                        position=attributes.get_attribute_index(key, attribute[0]),
+                        set=tech_level,
+                    )
                 )
-            )
-        Shield.objects.bulk_create(new_items)
-
-        new_items = []
-        # Support
-        attributes = ShipAttribute("Support")
-        for attribute in attributes.get_attributes(with_hsc_id=True):
-            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
-            new_items.append(
-                Support(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribute_index(attribute[0]),
-                    set=tech_level,
-                )
-            )
-        Support.objects.bulk_create(new_items)
-
-        new_items = []
-        # Mining
-        attributes = ShipAttribute("Mining")
-        for attribute in attributes.get_attributes(with_hsc_id=True):
-            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
-            new_items.append(
-                Mining(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribute_index(attribute[0]),
-                    set=tech_level,
-                )
-            )
-        Mining.objects.bulk_create(new_items)
-
-        new_items = []
-        # Trade
-        attributes = ShipAttribute("Trade")
-        for attribute in attributes.get_attributes(with_hsc_id=True):
-            tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
-            new_items.append(
-                Trade(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribute_index(attribute[0]),
-                    set=tech_level,
-                )
-            )
-        Trade.objects.bulk_create(new_items)
+            AttributeModel.objects.bulk_create(attributes_to_create)
 
     def remove_corporation(self, corporation_id: str) -> bool:
         corporation = self.corporation.all().filter(id=corporation_id).first()
@@ -245,6 +127,23 @@ class Member(CommonModel):
         if offset_minutes is not None and possible_timezones != []:
             return random.choice(possible_timezones)
         return "UTC"
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    def __get_member_attributes(self, key: str):
+        if key == "Weapon":
+            attributes_to_update = self.members_weapon.all()
+        elif key == "Shield":
+            attributes_to_update = self.members_shield.all()
+        elif key == "Support":
+            attributes_to_update = self.members_support.all()
+        elif key == "Mining":
+            attributes_to_update = self.members_mining.all()
+        elif key == "Trade":
+            attributes_to_update = self.members_trade.all()
+
+        return attributes_to_update
 
     def save(self, *args, **kwargs):
 

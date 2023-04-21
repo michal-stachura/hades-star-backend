@@ -80,15 +80,15 @@ class MemberViewSet(
 
     def __update_attribute(self, attribute_name, attribute_id, attribute_set):
         group_name = ShipAttribute().find_group_name_by_attribute_name(attribute_name)
-        if group_name == "weapon":
+        if group_name == "Weapon":
             attribute = self.get_object().members_weapon.all().get(id=attribute_id)
-        elif group_name == "shield":
+        elif group_name == "Shield":
             attribute = self.get_object().members_shield.all().get(id=attribute_id)
-        elif group_name == "support":
+        elif group_name == "Support":
             attribute = self.get_object().members_support.all().get(id=attribute_id)
-        elif group_name == "mining":
+        elif group_name == "Mining":
             attribute = self.get_object().members_mining.all().get(id=attribute_id)
-        elif group_name == "trade":
+        elif group_name == "Trade":
             attribute = self.get_object().members_trade.all().get(id=attribute_id)
         else:
             attribute = None
