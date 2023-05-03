@@ -3,6 +3,8 @@
 USE_DOCKER=yes
 IPYTHONDIR=/app/.ipython
 DJANGO_ACCOUNT_ALLOW_REGISTRATION=False
+HSC_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzNDQ2MTYyNjk4NzE0NDgwNjUiLCJndWlsZElkIjoiNDE5OTAzODE0MzEzNzA1NDg0IiwiaWF0IjoxNjc3MjQzOTc5LCJleHAiOjE3MDg4MDE1NzksInN1YiI6ImFwaSJ9.5dc0Fxrwt5IMp-Sg_1nd4MODkNRZCbYq2hd33GyfumM
+
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0

@@ -19,7 +19,8 @@ class MemberAdmin(admin.ModelAdmin):
         "next_ws",
         "rs_level",
         "bs_level",
-        "max_mods",
+        "miner_level",
+        "transport_level",
     ]
 
     list_filter = [

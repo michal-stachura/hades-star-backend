@@ -39,10 +39,12 @@ class MemberDetailSerializer(MemberSerializer):
             "rs_level",
             "ws_ship_roles",
             "next_ws",
-            "max_mods",
             "bs_level",
+            "miner_level",
+            "transport_level",
             "as_leader",
             "attributes",
+            "hsc_id",
             "is_visible",
         ]
 

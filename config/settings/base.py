@@ -295,3 +295,6 @@ SPECTACULAR_SETTINGS = {
 # Your stuff...
 # ------------------------------------------------------------------------------
 API_VERSION = env("DJANGO_API_VERSION", default="v1")
+# https://hs-compendium.com/api.html
+HSC_BOT_API = "https://bot.hs-compendium.com/compendium/api"
+HSC_TOKEN = env("HSC_TOKEN", default=None)

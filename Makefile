@@ -15,3 +15,6 @@ superuser:
 
 shell:
 	docker-compose -p hsb -f local.yml run --rm django python manage.py shell
+
+down:
+	sudo docker-compose -p hsb -f local.yml down

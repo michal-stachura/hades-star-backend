@@ -12,6 +12,16 @@ class Corporation(CommonModel):
     discord = models.URLField(null=True, blank=True)
     ws_wins = models.PositiveSmallIntegerField(default=0)
     secret = models.CharField(max_length=20, null=False)
+    role_id = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(role_id__gte=0),
+                name="corporation_role_id__gte_0",
+                violation_error_message="Role ID must be positive integer number",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -22,6 +32,13 @@ class Corporation(CommonModel):
     def set_secret(self, new_secret: str) -> None:
         self.secret = new_secret
         self.save()
+
+    def get_current_members_hsc_ids(self):
+        # List of members HadesStar Compendium IDs
+        members_hsc_ids = list(
+            set(self.corporation_members.all().values_list("hsc_id", flat=True))
+        )
+        return [x for x in members_hsc_ids if x is not None]
 
 
 class Filter(CommonModel):

@@ -33,6 +33,7 @@ class CorporationDetailSerializer(CorporationSerializer):
             "members",
             "discord",
             "ws_wins",
+            "role_id",
             "filters",
         ]
 
