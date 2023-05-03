@@ -103,13 +103,6 @@ class Member(CommonModel):
                 )
             AttributeModel.objects.bulk_create(attributes_to_create)
 
-    def remove_corporation(self, corporation_id: str) -> bool:
-        corporation = self.corporation.all().filter(id=corporation_id).first()
-        if corporation:
-            self.corporation.remove(corporation)
-            return True
-        return False
-
     def find_timezone_name(offset_minutes: int) -> str:
         if offset_minutes is None:
             return "UTC"

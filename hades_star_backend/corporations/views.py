@@ -191,7 +191,7 @@ class CorporationViewSet(
                 res = requests.get(
                     f"{settings.HSC_BOT_API}/techByRole?asArray=1&token={settings.HSC_TOKEN}&roleid={corporation.role_id}&rolename=bloodtide"  # noqa E501
                 )
-                return Response(res.json(), status=res.status_code)
+                return Response(res.json()["data"], status=res.status_code)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == "POST":

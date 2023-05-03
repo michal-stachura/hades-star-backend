@@ -1,6 +1,11 @@
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -11,7 +16,11 @@ from hades_star_backend.utils.ship_attributes import ShipAttribute
 
 
 class MemberViewSet(
-    GenericViewSet, RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
+    GenericViewSet,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    CreateModelMixin,
+    DestroyModelMixin,
 ):
     queryset = (
         Member.objects.all()
@@ -63,19 +72,6 @@ class MemberViewSet(
                 attribute_name, attribute_id, attrribute_set
             )
             return Response({"set": attribute.set})
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    @action(
-        detail=True,
-        methods=["delete"],
-        url_path="remove-corporation",
-        url_name="remove-corporation",
-    )
-    def remove_coorporation(self, request, *args, **kwargs):
-        corporation_id = request.data.get("corporation_id", None)
-
-        if corporation_id and self.get_object().remove_corporation(corporation_id):
-            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def __update_attribute(self, attribute_name, attribute_id, attribute_set):
