@@ -139,7 +139,7 @@ class ShipAttribute:
         for key in self.attributes.keys():
             self.group_name = key
             attributes_dict[key] = map(
-                self.__convert_attribute_to_dict, self.get_attributes()
+                self.__convert_attribute_to_dict, self.get_attributes(key)
             )
 
         return attributes_dict
