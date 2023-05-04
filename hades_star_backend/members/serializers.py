@@ -17,13 +17,20 @@ class MemberSerializer(serializers.ModelSerializer):
 
 
 class ModuleAttributeSerializer(serializers.ModelSerializer):
+    progress = serializers.SerializerMethodField()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.Meta.model = self.context.get("model", Weapon)
 
     class Meta:
-        fields = ["id", "name", "set", "max"]
+        fields = ["id", "name", "set", "max", "progress"]
+
+    def get_progress(self, obj):
+        result = (obj.set * 100) / obj.max
+        result_rounded = round(result, 2)
+        return result_rounded
 
 
 class MemberDetailSerializer(MemberSerializer):
