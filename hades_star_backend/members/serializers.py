@@ -62,25 +62,25 @@ class MemberDetailSerializer(MemberSerializer):
         serializer = ModuleAttributeSerializer(
             obj.members_weapon.all(), many=True, context={"model": Weapon}
         )
-        attributes["weapon"] = serializer.data
+        attributes["Weapon"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_shield.all(), many=True, context={"model": Shield}
         )
-        attributes["shield"] = serializer.data
+        attributes["Shield"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_support.all(), many=True, context={"model": Support}
         )
-        attributes["support"] = serializer.data
+        attributes["Support"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_mining.all(), many=True, context={"model": Mining}
         )
-        attributes["mining"] = serializer.data
+        attributes["Mining"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_trade.all(), many=True, context={"model": Trade}
         )
-        attributes["trade"] = serializer.data
+        attributes["Trade"] = serializer.data
         return attributes
