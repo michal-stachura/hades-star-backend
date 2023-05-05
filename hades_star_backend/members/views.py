@@ -10,7 +10,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from hades_star_backend.members.models import Member
-from hades_star_backend.members.serializers import MemberDetailSerializer
+from hades_star_backend.members.serializers import (
+    MemberDetailSerializer,
+    ModuleAttributeSerializer,
+)
 from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 from hades_star_backend.utils.ship_attributes import ShipAttribute
 
@@ -71,7 +74,8 @@ class MemberViewSet(
             attribute = self.__update_attribute(
                 attribute_name, attribute_id, attrribute_set
             )
-            return Response({"set": attribute.set})
+            serializer = ModuleAttributeSerializer(attribute)
+            return Response(serializer.data)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def __update_attribute(self, attribute_name, attribute_id, attribute_set):
