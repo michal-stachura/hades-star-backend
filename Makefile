@@ -1,5 +1,8 @@
-dev:
+run:
 	sudo docker-compose -p hsb -f local.yml up
+
+stop:
+	sudo docker-compose -p hsb -f local.yml stop
 
 build:
 	sudo docker-compose -p hsb -f local.yml build
