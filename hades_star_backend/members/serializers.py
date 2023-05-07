@@ -17,17 +17,26 @@ class MemberSerializer(serializers.ModelSerializer):
 
 
 class ModuleAttributeSerializer(serializers.ModelSerializer):
+    progress = serializers.SerializerMethodField()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.Meta.model = self.context.get("model", Weapon)
 
     class Meta:
-        fields = ["id", "name", "value", "max"]
+        fields = ["id", "name", "set", "max", "progress"]
+
+    def get_progress(self, obj):
+        result = (obj.set * 100) / obj.max
+        result_rounded = round(result, 2)
+        return result_rounded
 
 
 class MemberDetailSerializer(MemberSerializer):
     attributes = serializers.SerializerMethodField()
+    is_visible = serializers.SerializerMethodField()
+    next_ws = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,39 +46,48 @@ class MemberDetailSerializer(MemberSerializer):
             "rs_level",
             "ws_ship_roles",
             "next_ws",
-            "max_mods",
             "bs_level",
+            "miner_level",
+            "transport_level",
             "as_leader",
             "attributes",
+            "hsc_id",
+            "is_visible",
         ]
 
         excluded_fields = self.context.get("excluded_fields", [])
         self.Meta.fields = list(set(base_fields) - set(excluded_fields))
+
+    def get_next_ws(self, obj):
+        return obj.next_ws or "-"
+
+    def get_is_visible(self, obj):
+        return True
 
     def get_attributes(self, obj):
         attributes = {}
         serializer = ModuleAttributeSerializer(
             obj.members_weapon.all(), many=True, context={"model": Weapon}
         )
-        attributes["weapon"] = serializer.data
+        attributes["Weapon"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_shield.all(), many=True, context={"model": Shield}
         )
-        attributes["shield"] = serializer.data
+        attributes["Shield"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_support.all(), many=True, context={"model": Support}
         )
-        attributes["support"] = serializer.data
+        attributes["Support"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_mining.all(), many=True, context={"model": Mining}
         )
-        attributes["mining"] = serializer.data
+        attributes["Mining"] = serializer.data
 
         serializer = ModuleAttributeSerializer(
             obj.members_trade.all(), many=True, context={"model": Trade}
         )
-        attributes["trade"] = serializer.data
+        attributes["Trade"] = serializer.data
         return attributes

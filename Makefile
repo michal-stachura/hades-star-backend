@@ -1,5 +1,8 @@
-dev:
+run:
 	sudo docker-compose -p hsb -f local.yml up
+
+stop:
+	sudo docker-compose -p hsb -f local.yml stop
 
 build:
 	sudo docker-compose -p hsb -f local.yml build
@@ -15,3 +18,6 @@ superuser:
 
 shell:
 	docker-compose -p hsb -f local.yml run --rm django python manage.py shell
+
+down:
+	sudo docker-compose -p hsb -f local.yml down

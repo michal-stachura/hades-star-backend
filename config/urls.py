@@ -23,6 +23,10 @@ urlpatterns += [
         f"api/{settings.API_VERSION}/members/",
         include("hades_star_backend.members.urls", namespace="members"),
     ),
+    path(
+        f"api/{settings.API_VERSION}/utils/",
+        include("hades_star_backend.utils.urls", namespace="utils"),
+    ),
     # Docs
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(

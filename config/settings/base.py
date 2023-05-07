@@ -82,6 +82,7 @@ LOCAL_APPS = [
     # Your stuff: custom apps go here
     "hades_star_backend.corporations",
     "hades_star_backend.members",
+    "hades_star_backend.utils",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -294,3 +295,6 @@ SPECTACULAR_SETTINGS = {
 # Your stuff...
 # ------------------------------------------------------------------------------
 API_VERSION = env("DJANGO_API_VERSION", default="v1")
+# https://hs-compendium.com/api.html
+HSC_BOT_API = "https://bot.hs-compendium.com/compendium/api"
+HSC_TOKEN = env("HSC_TOKEN", default=None)

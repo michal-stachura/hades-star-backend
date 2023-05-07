@@ -1,4 +1,8 @@
+import random
+from datetime import datetime
+
 import pytz
+from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
@@ -37,8 +41,11 @@ class Member(CommonModel):
     ]
 
     name = models.CharField(max_length=50, null=False)
-    corporation = models.ManyToManyField(
-        Corporation, blank=True, related_name="corporation_members"
+    corporation = models.ForeignKey(
+        Corporation,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="corporation_members",
     )
     time_zone = models.CharField(max_length=32, choices=TIMEZONES, default="UTC")
     rs_level = models.PositiveSmallIntegerField(default=0)
@@ -49,96 +56,93 @@ class Member(CommonModel):
         null=True,
     )
     next_ws = models.CharField(max_length=1, blank=True, choices=NEXT_WS_PREFERENCES)
-    max_mods = models.PositiveSmallIntegerField(default=1)
     bs_level = models.PositiveSmallIntegerField(default=1)
+    miner_level = models.PositiveSmallIntegerField(default=1)
+    transport_level = models.PositiveBigIntegerField(default=1)
     as_leader = models.BooleanField(default=False)
+    hsc_id = models.CharField(max_length=20, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(hsc_id__gte=0),
+                name="member_hsc_id__gte_0",
+                violation_error_message="HSC ID must be positive integer number",
+            )
+        ]
+
+    def update_attributes(self, hsc_tech: object) -> None:
+        attributes = ShipAttribute()
+        for key in attributes.get_all_keys():
+            AttributeModel = apps.get_model("members", key)
+            attributes_to_update = []
+            members_attributes = self.__get_member_attributes(key)
+
+            for attribute in members_attributes:
+                attribute_hsc_id = attributes.get_attribute(key, attribute.name)[2]
+                attribute.set = hsc_tech["tech"][attribute_hsc_id]
+                attributes_to_update.append(attribute)
+            AttributeModel.objects.bulk_update(attributes_to_update, ["set"])
+
+    def create_base_attributes(self, hsc_tech: object | None = None) -> None:
+        attributes = ShipAttribute()
+        for key in attributes.get_all_keys():
+            AttributeModel = apps.get_model("members", key)
+            attributes_to_create = []
+
+            for attribute in attributes.get_attributes(key, with_hsc_id=True):
+                tech_level = hsc_tech["tech"][attribute[2]] if hsc_tech else 0
+                attributes_to_create.append(
+                    AttributeModel(
+                        member=self,
+                        name=attribute[0],
+                        max=attributes.get_maximum_value(attribute[0]),
+                        position=attributes.get_attribute_index(key, attribute[0]),
+                        set=tech_level,
+                    )
+                )
+            AttributeModel.objects.bulk_create(attributes_to_create)
+
+    def find_timezone_name(offset_minutes: int) -> str:
+        if offset_minutes is None:
+            return "UTC"
+        offset_seconds = offset_minutes * 60
+        possible_timezones = []
+
+        for tz in pytz.common_timezones:
+            timezone = pytz.timezone(tz)
+            try:
+                tz_offset = timezone.utcoffset(datetime.utcnow()).total_seconds()
+            except AttributeError:
+                continue
+            if tz_offset == offset_seconds:
+                possible_timezones.append(tz)
+        if offset_minutes is not None and possible_timezones != []:
+            return random.choice(possible_timezones)
+        return "UTC"
 
     def __str__(self) -> str:
         return f"{self.name}"
 
-    def __create_base_attributes(self):
-        new_items = []
-        # Weapon
-        attributes = ShipAttribute("weapon")
-        for attribute in attributes.get_attributes():
-            new_items.append(
-                Weapon(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
-                )
-            )
-        Weapon.objects.bulk_create(new_items)
+    def __get_member_attributes(self, key: str):
+        if key == "Weapon":
+            attributes_to_update = self.members_weapon.all()
+        elif key == "Shield":
+            attributes_to_update = self.members_shield.all()
+        elif key == "Support":
+            attributes_to_update = self.members_support.all()
+        elif key == "Mining":
+            attributes_to_update = self.members_mining.all()
+        elif key == "Trade":
+            attributes_to_update = self.members_trade.all()
 
-        new_items = []
-        # Shield
-        attributes = ShipAttribute("shield")
-        for attribute in attributes.get_attributes():
-            new_items.append(
-                Shield(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
-                )
-            )
-        Shield.objects.bulk_create(new_items)
-
-        new_items = []
-        # Support
-        attributes = ShipAttribute("support")
-        for attribute in attributes.get_attributes():
-            new_items.append(
-                Support(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
-                )
-            )
-        Support.objects.bulk_create(new_items)
-
-        new_items = []
-        # Mining
-        attributes = ShipAttribute("mining")
-        for attribute in attributes.get_attributes():
-            new_items.append(
-                Mining(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
-                )
-            )
-        Mining.objects.bulk_create(new_items)
-
-        new_items = []
-        # Trade
-        attributes = ShipAttribute("trade")
-        for attribute in attributes.get_attributes():
-            new_items.append(
-                Trade(
-                    member=self,
-                    name=attribute[0],
-                    max=attributes.get_maximum_value(attribute[0]),
-                    position=attributes.get_attribure_index(attribute[0]),
-                )
-            )
-        Trade.objects.bulk_create(new_items)
-
-    def remove_corporation(self, corporation_id: str) -> bool:
-        corporation = self.corporation.all().filter(id=corporation_id).first()
-        if corporation:
-            self.corporation.remove(corporation)
-            return True
-        return False
+        return attributes_to_update
 
     def save(self, *args, **kwargs):
 
+        if self.is_being_created is True:
+            self.create_base_attributes()
         super().save(*args, **kwargs)
-        if not Weapon.objects.filter(member=self).exists():
-            self.__create_base_attributes()
 
 
 class AtributeCommonModel(models.Model):
@@ -146,7 +150,7 @@ class AtributeCommonModel(models.Model):
     member = models.ForeignKey(
         Member, on_delete=models.CASCADE, related_name="members_%(class)s"
     )
-    value = models.PositiveSmallIntegerField(default=0)
+    set = models.PositiveSmallIntegerField(default=0)
     max = models.PositiveSmallIntegerField(default=12, editable=True)
     position = models.PositiveSmallIntegerField(default=0, editable=False)
 
@@ -154,9 +158,9 @@ class AtributeCommonModel(models.Model):
         ordering = ["position"]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(value__lte=12),
-                name="%(app_label)s_%(class)s_max_value__lte_12",
-                violation_error_message="Maximum value must be lower than 12",
+                check=models.Q(set__lte=12),
+                name="%(app_label)s_%(class)s_max_set__lte_12",
+                violation_error_message="Maximum value you can set must be lower than 12",
             ),
             models.UniqueConstraint(
                 fields=["member", "name"],
@@ -170,39 +174,39 @@ class AtributeCommonModel(models.Model):
 
 
 class Weapon(AtributeCommonModel):
-    attributes = ShipAttribute("weapon")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Weapon"),
+        default=attributes.get_default_attribute("Weapon"),
     )
 
 
 class Shield(AtributeCommonModel):
-    attributes = ShipAttribute("shield")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Shield"),
+        default=attributes.get_default_attribute("Shield"),
     )
 
 
 class Support(AtributeCommonModel):
-    attributes = ShipAttribute("support")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Support"),
+        default=attributes.get_default_attribute("Support"),
     )
 
     class Meta(AtributeCommonModel.Meta):
         constraints = AtributeCommonModel.Meta.constraints + [
             models.CheckConstraint(
                 check=(
-                    models.Q(name="SANCTUARY", value__lte=1)
+                    models.Q(name="SANCTUARY", set__lte=1)
                     | models.Q(
                         name__in=[
                             "EMP",
@@ -229,30 +233,30 @@ class Support(AtributeCommonModel):
                             "OMEGA_ROCKET",
                             "REMOTE_BOMB",
                         ],
-                        value__lte=12,
+                        set__lte=12,
                     )
                 ),
-                name="%(app_label)s_%(class)s_max_value__gt_1_or_lt_12",
-                violation_error_message="For Sanctuary maximum value must be lower than 1, rest attributes must be lower than 12",  # noqa E501
+                name="%(app_label)s_%(class)s_max_set__gt_1_or_lt_12",
+                violation_error_message="For Sanctuary maximum value you can set must be lower than 1, rest attributes must be lower than 12",  # noqa E501
             )
         ]
 
 
 class Mining(AtributeCommonModel):
-    attributes = ShipAttribute("mining")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Mining"),
+        default=attributes.get_default_attribute("Mining"),
     )
 
 
 class Trade(AtributeCommonModel):
-    attributes = ShipAttribute("trade")
+    attributes = ShipAttribute()
 
     name = models.CharField(
         max_length=30,
-        choices=attributes.get_attributes(),
-        default=attributes.get_default_attribute(),
+        choices=attributes.get_attributes("Trade"),
+        default=attributes.get_default_attribute("Trade"),
     )

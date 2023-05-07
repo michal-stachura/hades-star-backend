@@ -1,17 +1,29 @@
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from hades_star_backend.members.models import Member
-from hades_star_backend.members.serializers import MemberDetailSerializer
+from hades_star_backend.members.serializers import (
+    MemberDetailSerializer,
+    ModuleAttributeSerializer,
+)
 from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
 from hades_star_backend.utils.ship_attributes import ShipAttribute
 
 
 class MemberViewSet(
-    GenericViewSet, RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
+    GenericViewSet,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    CreateModelMixin,
+    DestroyModelMixin,
 ):
     queryset = (
         Member.objects.all()
@@ -45,7 +57,9 @@ class MemberViewSet(
         member = self.get_object()
         serializer = self.get_serializer(member, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            member.next_ws = request.data.get("next_ws", None)
+            member.save()
+            serializer = self.get_serializer(member)
             return Response(serializer.data)
         return Response(serializer.errors)
 
@@ -54,44 +68,32 @@ class MemberViewSet(
 
         attribute_name = request.data.get("attribute_name", None)
         attribute_id = request.data.get("attribute_id", None)
-        attrribute_value = request.data.get("value", None)
+        attrribute_set = request.data.get("set", None)
 
-        if attribute_name and attribute_id and isinstance(attrribute_value, int):
+        if attribute_name and attribute_id and isinstance(attrribute_set, int):
             attribute = self.__update_attribute(
-                attribute_name, attribute_id, attrribute_value
+                attribute_name, attribute_id, attrribute_set
             )
-            return Response({"value": attribute.value})
+            serializer = ModuleAttributeSerializer(attribute)
+            return Response(serializer.data)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @action(
-        detail=True,
-        methods=["delete"],
-        url_path="remove-corporation",
-        url_name="remove-corporation",
-    )
-    def remove_coorporation(self, request, *args, **kwargs):
-        corporation_id = request.data.get("corporation_id", None)
-
-        if corporation_id and self.get_object().remove_corporation(corporation_id):
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def __update_attribute(self, attribute_name, attribute_id, attribute_value):
+    def __update_attribute(self, attribute_name, attribute_id, attribute_set):
         group_name = ShipAttribute().find_group_name_by_attribute_name(attribute_name)
-        if group_name == "weapon":
+        if group_name == "Weapon":
             attribute = self.get_object().members_weapon.all().get(id=attribute_id)
-        elif group_name == "shield":
+        elif group_name == "Shield":
             attribute = self.get_object().members_shield.all().get(id=attribute_id)
-        elif group_name == "support":
+        elif group_name == "Support":
             attribute = self.get_object().members_support.all().get(id=attribute_id)
-        elif group_name == "mining":
+        elif group_name == "Mining":
             attribute = self.get_object().members_mining.all().get(id=attribute_id)
-        elif group_name == "trade":
+        elif group_name == "Trade":
             attribute = self.get_object().members_trade.all().get(id=attribute_id)
         else:
             attribute = None
 
         if attribute:
-            attribute.value = attribute_value
+            attribute.set = attribute_set
             attribute.save()
         return attribute
