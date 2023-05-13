@@ -82,6 +82,7 @@ LOCAL_APPS = [
     # Your stuff: custom apps go here
     "hades_star_backend.corporations",
     "hades_star_backend.members",
+    "hades_star_backend.wslogs",
     "hades_star_backend.utils",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

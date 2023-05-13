@@ -71,6 +71,23 @@ class Member(CommonModel):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    def __get_member_attributes(self, key: str):
+        if key == "Weapon":
+            attributes_to_update = self.members_weapon.all()
+        elif key == "Shield":
+            attributes_to_update = self.members_shield.all()
+        elif key == "Support":
+            attributes_to_update = self.members_support.all()
+        elif key == "Mining":
+            attributes_to_update = self.members_mining.all()
+        elif key == "Trade":
+            attributes_to_update = self.members_trade.all()
+
+        return attributes_to_update
+
     def update_attributes(self, hsc_tech: object) -> None:
         attributes = ShipAttribute()
         for key in attributes.get_all_keys():
@@ -120,23 +137,6 @@ class Member(CommonModel):
         if offset_minutes is not None and possible_timezones != []:
             return random.choice(possible_timezones)
         return "UTC"
-
-    def __str__(self) -> str:
-        return f"{self.name}"
-
-    def __get_member_attributes(self, key: str):
-        if key == "Weapon":
-            attributes_to_update = self.members_weapon.all()
-        elif key == "Shield":
-            attributes_to_update = self.members_shield.all()
-        elif key == "Support":
-            attributes_to_update = self.members_support.all()
-        elif key == "Mining":
-            attributes_to_update = self.members_mining.all()
-        elif key == "Trade":
-            attributes_to_update = self.members_trade.all()
-
-        return attributes_to_update
 
     def save(self, *args, **kwargs):
 

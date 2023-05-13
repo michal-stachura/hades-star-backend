@@ -75,6 +75,13 @@ class CorporationViewSet(
         )
 
     @action(
+        detail=True, methods=["post"], url_path="add-ws-match", url_name="add-ws-match"
+    )
+    def add_ws_match(self, request, *args, **kwargs):
+
+        return Response("ok")
+
+    @action(
         detail=True, methods=["patch"], url_path="set-secret", url_name="set-secret"
     )
     def set_secret(self, request, *args, **kwargs):
