@@ -20,6 +20,7 @@ from hades_star_backend.corporations.serializers import (
 )
 from hades_star_backend.members.models import Member
 from hades_star_backend.utils.permissions import CorporationObjectSecretCheck
+from hades_star_backend.wslogs.serializers import WsLogSerlializer
 
 
 class CorporationViewSet(
@@ -78,6 +79,11 @@ class CorporationViewSet(
         detail=True, methods=["post"], url_path="add-ws-match", url_name="add-ws-match"
     )
     def add_ws_match(self, request, *args, **kwargs):
+        serializer = WsLogSerlializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response("ok")
 
