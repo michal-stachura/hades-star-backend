@@ -24,6 +24,10 @@ urlpatterns += [
         include("hades_star_backend.members.urls", namespace="members"),
     ),
     path(
+        f"api/{settings.API_VERSION}/ws-logs/",
+        include("hades_star_backend.wslogs.urls", namespace="ws-logs"),
+    ),
+    path(
         f"api/{settings.API_VERSION}/utils/",
         include("hades_star_backend.utils.urls", namespace="utils"),
     ),
